@@ -14,20 +14,17 @@ Examples of projects using the module:
 example script:
 
 ```python:
-from csv import reader
-import ast
+import json
 from time_series_plot import render_time_series_plot_with_histogram
 
-with open("data1.csv", 'r') as csvfile:
-    csv_reader = reader(csvfile)
-    rows = [row for row in csv_reader]
+with open("data1.json", "r") as data:
+    data = json.load(data)
 
-xdata = [int(x) for x in rows[0]]
-ydata = [int(x) for x in rows[1]]
+xdata = data["xdata"]
+ydata = data["ydata"]
 
 tags = []
-for tag in rows[2]:
-    tag = ast.literal_eval(tag)
+for tag in data["tags"]:
     tags.append({
         'name':  tag[0],
         'start': float(tag[1]),
@@ -47,7 +44,6 @@ render_time_series_plot_with_histogram(
     tags=tags,
     tagstype="double"
 )
-
 ```
 
 running script from terminal: 
@@ -67,21 +63,18 @@ Generated plot with PNG extension:
 example script:
 
 ```
-from csv import reader
-import ast
+import json
 from time_series_plot import render_multiple_time_series_plot
 
-with open("data2.csv", 'r') as csvfile:
-    csv_reader = reader(csvfile)
-    rows = [row for row in csv_reader]
+with open("data2.json", "r") as data:
+    data = json.load(data)
 
-xdata = [int(x) for x in rows[0]]
-ydata1 = [int(x) for x in rows[1]]
-ydata2 = [int(x) for x in rows[2]]
+xdata = data["xdata"]
+ydata1 = data["ydata1"]
+ydata2 = data["ydata2"]
 
 tags = []
-for tag in rows[3]:
-    tag = ast.literal_eval(tag)
+for tag in data["tags"]:
     tags.append({
         'name':  tag[0],
         'timestamp': float(tag[1])

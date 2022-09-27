@@ -4,11 +4,11 @@ from time_series_plot import render_time_series_plot_with_histogram
 with open("data1.json", "r") as data:
     data = json.load(data)
 
-xdata = data[0]
-ydata = data[1]
+xdata = data["xdata"]
+ydata = data["ydata"]
 
 tags = []
-for tag in data[2]:
+for tag in data["tags"]:
     tags.append({
         'name':  tag[0],
         'start': float(tag[1]),
