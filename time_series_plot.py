@@ -376,6 +376,47 @@ def create_ascii_plot(
         canvas_color='black',
         axes_color='black',
         ticks_color='white'):
+    """
+    Draws ASCII time series plot in terminal.
+
+    Used i.e. to draw time series plot during CI.
+
+    Parameters
+    ----------
+    title : str
+        Title of the plot
+    xtitle : str
+        Name of the X axis
+    xuint : str
+        Unit for the X axis
+    ytitle : str
+        Name of the Y axis
+    yunit : str
+        Unit for the Y axis
+    xdata : List
+        The values for X dimension
+    ydata : List
+        The values for Y dimension
+    xrange : Optional[Tuple]
+        The range of zoom on X axis
+    yrange : Optional[Tuple]
+        The range of zoom on Y axis
+    trimxvalues : bool
+        True if all values for the X dimension should be subtracted by
+        the minimal value on this dimension
+    skipfirst: bool
+        True if the first entry should be removed from plotting.
+    figsize: Optional[Tuple]
+        The size of the figure
+    switchtobarchart:
+        True if we want to change the plot type to barchart
+    canvas_color:
+        Name of color of the plot background
+    axes_color:
+        Name of color of the background of labels surrounding plot 
+    ticks_color:
+        Name of color of the axes ticks and of the grid lines
+    """
 
     plotext.clear_figure()
     start = 1 if skipfirst else 0
