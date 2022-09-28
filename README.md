@@ -9,7 +9,7 @@ Examples of projects using the module:
 
 ## Examples of running time_series_plot
 
-### Rendering inference plot based on example kenning output in all possible extensions
+### Rendering single plot in all possible extensions
 
 example script:
 
@@ -33,7 +33,7 @@ for tag in data["tags"]:
 
 render_time_series_plot_with_histogram(
     "example_plots/singleplot",
-    ["txt", "html", "png"],
+    ["txt", "html", "png", "svg"],
     "Example plot",
     "X axis",
     "unit",
