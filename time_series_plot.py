@@ -1,3 +1,7 @@
+"""
+Functions to creating and rendering time series plots in various formats
+"""
+
 import numpy as np
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
