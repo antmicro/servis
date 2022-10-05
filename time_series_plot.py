@@ -12,6 +12,8 @@ from bokeh.models import Div, Range1d, Span, LabelSet, ColumnDataSource
 from bokeh.io import export_png, export_svg
 import plotext
 import datetime
+import geckodriver_autoinstaller
+geckodriver_autoinstaller.install()
 
 
 def get_colors(data: List):
