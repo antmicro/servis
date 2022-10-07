@@ -1,4 +1,4 @@
-# Kenning plots
+# Kenning plot
 
 A repository for rendering time series plots in various formats.
 
@@ -15,7 +15,7 @@ example script:
 
 ```python:
 import json
-from time_series_plot import render_time_series_plot_with_histogram
+from kenning_plot import render_time_series_plot_with_histogram
 
 with open("data1.json", "r") as data:
     data = json.load(data)
@@ -64,7 +64,7 @@ example script:
 
 ```
 import json
-from time_series_plot import render_multiple_time_series_plot
+from kenning_plot import render_multiple_time_series_plot
 
 with open("data2.json", "r") as data:
     data = json.load(data)

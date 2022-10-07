@@ -1,5 +1,5 @@
 import json
-from time_series_plot import render_multiple_time_series_plot
+from kenning import render_multiple_time_series_plot
 
 with open("data2.json", "r") as data:
     data = json.load(data)
