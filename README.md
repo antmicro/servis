@@ -7,15 +7,25 @@ Examples of projects using the module:
 * [Kenning](https://github.com/antmicro/kenning)
 * [Sargraph](https://github.com/antmicro/sargraph)
 
+## Requirements
+
+The module requires:
+
+* [NumPy](https://numpy.org/),
+* [plotext](https://github.com/piccolomo/plotext),
+* [Bokeh](https://bokeh.org/),
+* [Selenium](https://www.selenium.dev/),
+* [geckodriver](https://github.com/mozilla/geckodriver).
+
 ## Examples of running time_series_plot
 
 ### Rendering single plot in all possible extensions
 
 example script:
 
-```python:
+```python
 import json
-from kenning_plot import render_time_series_plot_with_histogram
+from kenning_plot.time_series import render_time_series_plot_with_histogram
 
 with open("data1.json", "r") as data:
     data = json.load(data)
@@ -46,10 +56,10 @@ render_time_series_plot_with_histogram(
 )
 ```
 
-running script from terminal: 
+running script from terminal:
 
 
-```
+```bash
 python3 test1.py
 ```
 
@@ -62,9 +72,9 @@ Generated plot with PNG extension:
 
 example script:
 
-```
+```python
 import json
-from kenning_plot import render_multiple_time_series_plot
+from kenning_plot.time_series import render_multiple_time_series_plot
 
 with open("data2.json", "r") as data:
     data = json.load(data)
@@ -98,10 +108,10 @@ render_multiple_time_series_plot(
 )
 ```
 
-running script from terminal: 
+running script from terminal:
 
 
-```
+```bash
 python3 test2.py
 ```
 
