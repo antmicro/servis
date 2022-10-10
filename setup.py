@@ -22,6 +22,5 @@ setuptools.setup(
         'numpy>=1.23.0',
         'plotext>=5.0.2',
         'selenium>=4.4.0',
-        'geckodriver_autoinstaller>=0.1.0'
     ],
 )
