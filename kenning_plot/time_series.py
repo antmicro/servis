@@ -308,6 +308,7 @@ def time_series_plot(
 
 def value_histogram(
         ydata: List,
+        yrange: Optional[Range1d] = None,
         skipfirst: bool = False,
         figsize: Tuple = (1500, 850),
         bins: int = 20,
@@ -320,6 +321,8 @@ def value_histogram(
     ----------
     ydata : List
         The values for Y dimension
+    yrange : Optional[Tuple]
+        The range of zoom on Y axis
     skipfirst: bool
         True if the first entry should be removed from plotting.
     figsize: Tuple
@@ -345,6 +348,7 @@ def value_histogram(
                     x_axis_type='log',
                     toolbar_location="above",
                     tools="save",
+                    y_range=yrange,
                     output_backend='webgl')
 
     plot.yaxis.visible = False
@@ -553,6 +557,7 @@ def render_time_series_plot_with_histogram(
 
     val_hist = value_histogram(
         ydata,
+        ts_plot.y_range,
         skipfirst,
         # plots should be in a ratio of 8:3
         figsize=(figsize[0]*3/11, figsize[1]),
@@ -602,7 +607,7 @@ def render_multiple_time_series_plot(
         xdata: List,
         ydatas: List,
         xrange: Optional[Tuple] = None,
-        yrange: Optional[Tuple] = None,
+        yrange: Optional[Tuple] = (-5, 105),
         trimxvalues: bool = True,
         skipfirst: bool = False,
         figsize: Tuple = (1500, 1080),
@@ -677,7 +682,7 @@ def render_multiple_time_series_plot(
             yunit,
             xdata,
             ydata,
-            yrange=(-5, 105),
+            yrange,
             trimxvalues=trimxvalues,
             skipfirst=skipfirst,
             # plots should be in a ratio of 8:3
@@ -690,15 +695,13 @@ def render_multiple_time_series_plot(
 
         val_histograms.append(value_histogram(
             list(np.float_(ydata)),
+            ts_plots[-1].y_range,
             skipfirst,
             # plots should be in a ratio of 8:3
             figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
             bins=bins,
             setgradientcolors=True
         ))
-
-    for val_histogram in val_histograms:
-        val_histogram.y_range = Range1d(-5, 105)
 
     div = Div(text=title)
 
