@@ -102,6 +102,7 @@ render_multiple_time_series_plot(
     ["unit"]*2,
     xdata,
     [ydata1, ydata2],
+    yrange=(-5, 105),
     tags=tags,
     tagstype="single",
     figsize=(100, 20)
