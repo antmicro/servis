@@ -4,12 +4,12 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='kenning_plot',
+    name='servis',
     version='0.0.1',
     packages=setuptools.find_packages(),
     include_package_data=True,
     long_description=long_description,
-    description="kenning-plot - a tool for drawing time series plots",
+    description="Servis - a tool for drawing time series plots",
     author='Antmicro Ltd.',
     author_email='contact@antmicro.com',
     classifiers=[

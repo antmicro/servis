@@ -1,4 +1,4 @@
-# Kenning plot
+# Servis
 
 A repository for rendering time series plots in various formats.
 
@@ -17,7 +17,7 @@ The module requires:
 * [Selenium](https://www.selenium.dev/),
 * [geckodriver](https://github.com/mozilla/geckodriver).
 
-## Examples of running time_series_plot
+## Examples of running Servis
 
 ### Rendering single plot in all possible extensions
 
@@ -25,7 +25,7 @@ example script:
 
 ```python
 import json
-from kenning_plot import render_time_series_plot_with_histogram
+from servis import render_time_series_plot_with_histogram
 
 with open("data1.json", "r") as data:
     data = json.load(data)
@@ -74,7 +74,7 @@ example script:
 
 ```python
 import json
-from kenning_plot import render_multiple_time_series_plot
+from servis import render_multiple_time_series_plot
 
 with open("data2.json", "r") as data:
     data = json.load(data)
