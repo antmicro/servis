@@ -11,6 +11,7 @@ from bokeh.layouts import gridplot
 from bokeh.models import Div, Range1d, Span, LabelSet, ColumnDataSource
 from bokeh.io import export_png, export_svg
 import plotext
+from matplotlib import pyplot as plt
 import datetime
 
 
@@ -467,6 +468,91 @@ def create_ascii_plot(
     plotext.show()
 
 
+def create_matplotlib_plot(
+        outpath: Optional[Path],
+        title: str,
+        xtitle: str,
+        xunit: str,
+        ytitle: str,
+        yunit: str,
+        xdata: List,
+        ydata: List,
+        trimxvalues: bool = True,
+        skipfirst: bool = False,
+        figsize: Tuple = (15, 8.5),
+        bins: int = 20):
+    """
+    Draws time series plot.
+
+    It also draws the histogram of values that appeared throughout the
+    experiment.
+
+    Parameters
+    ----------
+    outpath : Optional[Path]
+        Output path for the plot image. If None, the plot will be displayed.
+    title : str
+        Title of the plot
+    xtitle : str
+        Name of the X axis
+    xuint : str
+        Unit for the X axis
+    ytitle : str
+        Name of the Y axis
+    yunit : str
+        Unit for the Y axis
+    xdata : List
+        The values for X dimension
+    ydata : List
+        The values for Y dimension
+    trimxvalues : bool
+        True if all values for the X dimension should be subtracted by
+        the minimal value on this dimension
+    skipfirst: bool
+        True if the first entry should be removed from plotting.
+    figsize: Tuple
+        The size of the figure
+    bins: int
+        Number of bins for value histograms
+    """
+    start = 1 if skipfirst else 0
+    xdata = np.array(xdata[start:], copy=True)
+    ydata = np.array(ydata[start:], copy=True)
+    if trimxvalues:
+        minx = min(xdata)
+        xdata = [x - minx for x in xdata]
+    fig, (axplot, axhist) = plt.subplots(
+        ncols=2,
+        tight_layout=True,
+        figsize=figsize,
+        sharey=True,
+        gridspec_kw={'width_ratios': (8, 3)}
+    )
+    fig.suptitle(title, fontsize='x-large')
+    axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
+    xlabel = xtitle
+    if xunit is not None:
+        xlabel += f' [{xunit}]'
+    ylabel = ytitle
+    if yunit is not None:
+        ylabel += f' [{yunit}]'
+    axplot.set_xlabel(xlabel, fontsize='large')
+    axplot.set_ylabel(ylabel, fontsize='large')
+    axplot.grid()
+
+    axhist.hist(ydata, bins=bins, orientation='horizontal', color='purple')
+    axhist.set_xscale('log')
+    axhist.set_xlabel('Value histogram', fontsize='large')
+    axhist.grid(which='both')
+    plt.setp(axhist.get_yticklabels(), visible=False)
+
+    if outpath is None:
+        plt.show()
+    else:
+        plt.savefig(outpath)
+
+
+
 def render_time_series_plot_with_histogram(
         outpath: Optional[Path],
         outputext: Optional[List[str]],
@@ -484,7 +570,8 @@ def render_time_series_plot_with_histogram(
         figsize: Tuple = (1500, 850),
         bins: int = 20,
         tags: List = [],
-        tagstype: str = "single"):
+        tagstype: str = "single",
+        backend: List[str] = ["bokeh"]):
     """
     Draws time series plot.
 
@@ -537,7 +624,7 @@ def render_time_series_plot_with_histogram(
         timestamps.
     """
 
-    ts_plot = time_series_plot(
+    ts_plot=time_series_plot(
         title,
         xtitle,
         xunit,
@@ -550,9 +637,9 @@ def render_time_series_plot_with_histogram(
         trimxvalues,
         skipfirst,
         # plots should be in a ratio of 8:3
-        figsize=(figsize[0]*8/11, figsize[1]),
-        tags=tags,
-        tagstype=tagstype
+        figsize = (figsize[0]*8/11, figsize[1]),
+        tags = tags,
+        tagstype = tagstype
     )
 
     val_hist = value_histogram(
@@ -588,9 +675,40 @@ def render_time_series_plot_with_histogram(
 
     plot = gridplot([ts_plot, val_hist], ncols=2, toolbar_location=None)
 
-    if "png" in outputext:
+    if "png" in outputext and "matplotlib" in backend:
+        create_matplotlib_plot(
+            f'{outpath}.png',
+            title,
+            xtitle,
+            xunit,
+            ytitle,
+            yunit,
+            xdata,
+            ydata,
+            trimxvalues,
+            skipfirst,
+            figsize=(figsize[0]/100, figsize[1]/100),
+            bins=bins
+        )
+    if "svg" in outputext and "matplotlib" in backend:
+        create_matplotlib_plot(
+            f'{outpath}.svg',
+            title,
+            xtitle,
+            xunit,
+            ytitle,
+            yunit,
+            xdata,
+            ydata,
+            trimxvalues,
+            skipfirst,
+            figsize=(figsize[0]/100, figsize[1]/100),
+            bins=bins
+        )
+
+    if "png" in outputext and "bokeh" in backend:
         export_png(plot, filename=f'{outpath}.png')
-    if "svg" in outputext:
+    if "svg" in outputext and "bokeh" in backend:
         export_svg(plot, filename=f'{outpath}.svg')
 
 
