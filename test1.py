@@ -27,5 +27,5 @@ render_time_series_plot_with_histogram(
     ydata,
     tags=tags,
     tagstype="double",
-    backend=["matplotlib"]
+    backend="matplotlib"
 )
