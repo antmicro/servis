@@ -13,7 +13,10 @@ The module requires:
 
 * [NumPy](https://numpy.org/),
 * [plotext](https://github.com/piccolomo/plotext),
-* [Bokeh](https://bokeh.org/),
+* [Bokeh](https://bokeh.org/)
+
+Optional dependencies for exporting png/svg plots using Bokeh:
+
 * [Selenium](https://www.selenium.dev/),
 * [geckodriver](https://github.com/mozilla/geckodriver).
 
