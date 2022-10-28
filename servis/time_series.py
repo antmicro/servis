@@ -287,7 +287,7 @@ def time_series_plot(
                         min_y_value=min(ydata),
                         yrange=yrange)
 
-    plot.title.text_font_size = '7.5'
+    plot.title.text_font_size = 'large'
     plot.xaxis.axis_label_text_font_size = '14pt'
     plot.yaxis.axis_label_text_font_size = '14pt'
 
