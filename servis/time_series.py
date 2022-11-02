@@ -552,6 +552,70 @@ def create_matplotlib_plot(
         plt.savefig(outpath)
 
 
+def create_multiple_matplotlib_plot(
+        plotsnumber: int,
+        outpath: Optional[Path],
+        title: str,
+        subtitles: List[str],
+        xtitles: List[str],
+        xunits: List[str],
+        ytitles: List[str],
+        yunits: List[str],
+        xdata: List,
+        ydatas: List,
+        trimxvalues: bool = True,
+        skipfirst: bool = False,
+        figsize: Tuple = (1500, 1080),
+        bins: int = 20):
+
+    start = 1 if skipfirst else 0
+    xdata = np.array(xdata[start:], copy=True)
+    for ydata in ydatas:
+        ydata = np.array(ydata[start:], copy=True)
+    if trimxvalues:
+        minx = min(xdata)
+        xdata = [x - minx for x in xdata]
+    fig, axs = plt.subplots(
+        ncols=2,
+        nrows=plotsnumber,
+        tight_layout=True,
+        figsize=figsize,
+        sharey=True,
+        gridspec_kw={'width_ratios': (8, 3)}
+    )
+    fig.suptitle(title, fontsize='x-large')
+
+    for ydata, axplot, subtitle in zip(ydatas, axs[:, 0], subtitles):
+        axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
+        axplot.set_title(subtitle)
+
+    xlabels = xtitles
+    for xunit, xlabel in zip(xunits, xlabels):
+        if xunits is not None:
+            xlabel += f' [{xunit}]'
+
+    ylabels = ytitles
+    for yunit, ylabel in zip(yunits, ylabels):
+        if yunits is not None:
+            ylabel += f' [{yunit}]'
+
+    for xlabel, ylabel, axplot in zip(xlabels, ylabels, axs[:, 0]):
+        axplot.set_xlabel(xlabel, fontsize='large')
+        axplot.set_ylabel(ylabel, fontsize='large')
+        axplot.grid()
+
+    for ydata, axhist in zip(ydatas, axs[:, 1]):
+        axhist.hist(ydata, bins=bins, orientation='horizontal', color='purple')
+        axhist.set_xscale('log')
+        axhist.set_xlabel('Value histogram', fontsize='large')
+        axhist.grid(which='both')
+        plt.setp(axhist.get_yticklabels(), visible=False)
+
+    if outpath is None:
+        plt.show()
+    else:
+        plt.savefig(outpath)
+
 
 def render_time_series_plot_with_histogram(
         outpath: Optional[Path],
@@ -571,7 +635,7 @@ def render_time_series_plot_with_histogram(
         bins: int = 20,
         tags: List = [],
         tagstype: str = "single",
-        backend: List[str] = ["bokeh"]):
+        backend: str = "bokeh"):
     """
     Draws time series plot.
 
@@ -624,7 +688,7 @@ def render_time_series_plot_with_histogram(
         timestamps.
     """
 
-    ts_plot=time_series_plot(
+    ts_plot = time_series_plot(
         title,
         xtitle,
         xunit,
@@ -637,9 +701,9 @@ def render_time_series_plot_with_histogram(
         trimxvalues,
         skipfirst,
         # plots should be in a ratio of 8:3
-        figsize = (figsize[0]*8/11, figsize[1]),
-        tags = tags,
-        tagstype = tagstype
+        figsize=(figsize[0]*8/11, figsize[1]),
+        tags=tags,
+        tagstype=tagstype
     )
 
     val_hist = value_histogram(
@@ -675,7 +739,7 @@ def render_time_series_plot_with_histogram(
 
     plot = gridplot([ts_plot, val_hist], ncols=2, toolbar_location=None)
 
-    if "png" in outputext and "matplotlib" in backend:
+    if "png" in outputext and backend == "matplotlib":
         create_matplotlib_plot(
             f'{outpath}.png',
             title,
@@ -690,7 +754,7 @@ def render_time_series_plot_with_histogram(
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
-    if "svg" in outputext and "matplotlib" in backend:
+    if "svg" in outputext and backend == "matplotlib":
         create_matplotlib_plot(
             f'{outpath}.svg',
             title,
@@ -706,9 +770,9 @@ def render_time_series_plot_with_histogram(
             bins=bins
         )
 
-    if "png" in outputext and "bokeh" in backend:
+    if "png" in outputext and backend == "bokeh":
         export_png(plot, filename=f'{outpath}.png')
-    if "svg" in outputext and "bokeh" in backend:
+    if "svg" in outputext and backend == "bokeh":
         export_svg(plot, filename=f'{outpath}.svg')
 
 
@@ -732,7 +796,8 @@ def render_multiple_time_series_plot(
         bins: int = 20,
         switchtobarchart: bool = True,
         tags: List[Dict] = [],
-        tagstype: str = "single"):
+        tagstype: str = "single",
+        backend: str = "bokeh"):
     """
     Draws multiple time series plot.
 
@@ -791,9 +856,9 @@ def render_multiple_time_series_plot(
     ts_plots = []
     val_histograms = []
 
-    for title, xtitle, xunit, ytitle, yunit, ydata in zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):  # noqa: E501
+    for subtitle, xtitle, xunit, ytitle, yunit, ydata in zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):  # noqa: E501
         ts_plots.append(time_series_plot(
-            title,
+            subtitle,
             xtitle,
             xunit,
             ytitle,
@@ -856,10 +921,47 @@ def render_multiple_time_series_plot(
         output_file(f"{outpath}.html", title=title, mode='inline')
         save(multiple_plot)
 
+    if "png" in outputext and backend == "matplotlib":
+        create_multiple_matplotlib_plot(
+            plotsnumber,
+            f'{outpath}.png',
+            title,
+            subtitles,
+            xtitles,
+            xunits,
+            ytitles,
+            yunits,
+            xdata,
+            ydatas,
+            trimxvalues,
+            skipfirst,
+            figsize=(figsize[0]/100, figsize[1]/100),
+            bins=bins
+        )
+
+    if "svg" in outputext and backend == "matplotlib":
+        create_multiple_matplotlib_plot(
+            plotsnumber,
+            f'{outpath}.svg',
+            title,
+            subtitles,
+            xtitles,
+            xunits,
+            ytitles,
+            yunits,
+            xdata,
+            ydatas,
+            trimxvalues,
+            skipfirst,
+            figsize=(figsize[0]/100, figsize[1]/100),
+            bins=bins
+        )
+
     multiple_plot = gridplot(
         plots, merge_tools=True, toolbar_location=None)
-    if "png" in outputext:
+
+    if "png" in outputext and backend == "bokeh":
         export_png(multiple_plot, filename=f"{outpath}.png")
 
-    if "svg" in outputext:
+    if "svg" in outputext and backend == "bokeh":
         export_svg(multiple_plot, filename=f"{outpath}.svg")

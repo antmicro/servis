@@ -96,7 +96,7 @@ for tag in data["tags"]:
 render_multiple_time_series_plot(
     2,
     "example_plots/multipleplot",
-    ["txt"],
+    ["png", "html"],
     "Example plot",
     ["Plot1", "Plot2"],
     ["X axis"]*2,
@@ -108,7 +108,7 @@ render_multiple_time_series_plot(
     yrange=(-5, 105),
     tags=tags,
     tagstype="single",
-    figsize=(100, 20)
+    backend="matplotlib"
 )
 ```
 
