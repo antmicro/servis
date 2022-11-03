@@ -468,6 +468,129 @@ def create_ascii_plot(
     plotext.show()
 
 
+def create_multiple_matplotlib_plot(
+        plotsnumber: int,
+        outpath: Optional[Path],
+        title: str,
+        subtitles: Optional[List[str]],
+        xtitles: List[str],
+        xunits: List[str],
+        ytitles: List[str],
+        yunits: List[str],
+        xdata: List,
+        ydatas: List,
+        trimxvalues: bool = True,
+        skipfirst: bool = False,
+        figsize: Tuple = (1500, 1080),
+        bins: int = 20):
+    """
+    Draws time series plot.
+
+    It also draws the histogram of values that appeared throughout the
+    experiment.
+
+    Parameters
+    ----------
+    plotsnumber: int
+        Number of time series plots in the figure.
+    outpath : Optional[Path]
+        Output path for the plot image. If None, the plot will be displayed.
+    title : List[str]
+        Title of the plot
+    subtitles : List[str]
+        Titles of the subplots
+    xtitles : List[str]
+        Name of the X axis
+    xuints : List[str]
+        Unit for the X axis
+    ytitles : List[str]
+        Name of the Y axis
+    yunits : List[str]
+        Unit for the Y axis
+    xdata : List
+        The values for X dimension
+    ydatas : List
+        The values for Y dimension
+    trimxvalues : bool
+        True if all values for the X dimension should be subtracted by
+        the minimal value on this dimension
+    skipfirst: bool
+        True if the first entry should be removed from plotting.
+    figsize: Tuple
+        The size of the figure
+    bins: int
+        Number of bins for value histograms
+    """
+
+    start = 1 if skipfirst else 0
+    xdata = np.array(xdata[start:], copy=True)
+    for ydata in ydatas:
+        ydata = np.array(ydata[start:], copy=True)
+    if trimxvalues:
+        minx = min(xdata)
+        xdata = [x - minx for x in xdata]
+    fig, axs = plt.subplots(
+        ncols=2,
+        nrows=plotsnumber,
+        tight_layout=True,
+        figsize=figsize,
+        sharey=True,
+        gridspec_kw={'width_ratios': (8, 3)}
+    )
+    fig.suptitle(title, fontsize='x-large')
+
+    if plotsnumber == 1:
+        axplot = axs[0]
+        axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
+    else:
+        for ydata, axplot in zip(ydatas, axs[:, 0]):
+            axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
+
+    if subtitles is not None:
+        for subtitle in subtitles:
+            axplot.set_title(subtitle)
+
+    xlabels = xtitles
+    for xunit, xlabel in zip(xunits, xlabels):
+        if xunits is not None:
+            xlabel += f' [{xunit}]'
+
+    ylabels = ytitles
+    for yunit, ylabel in zip(yunits, ylabels):
+        if yunits is not None:
+            ylabel += f' [{yunit}]'
+
+    if plotsnumber == 1:
+        axplot.set_xlabel(xlabel, fontsize='large')
+        axplot.set_ylabel(ylabel, fontsize='large')
+        axplot.grid()
+
+        axhist = axs[1]
+        axhist.hist(ydata, bins=bins, orientation='horizontal', color='purple')
+        axhist.set_xscale('log')
+        axhist.set_xlabel('Value histogram', fontsize='large')
+        axhist.grid(which='both')
+        plt.setp(axhist.get_yticklabels(), visible=False)
+    else:
+        for xlabel, ylabel, axplot in zip(xlabels, ylabels, axs[:, 0]):
+            axplot.set_xlabel(xlabel, fontsize='large')
+            axplot.set_ylabel(ylabel, fontsize='large')
+            axplot.grid()
+
+        for ydata, axhist in zip(ydatas, axs[:, 1]):
+            axhist.hist(ydata, bins=bins,
+                        orientation='horizontal', color='purple')
+            axhist.set_xscale('log')
+            axhist.set_xlabel('Value histogram', fontsize='large')
+            axhist.grid(which='both')
+            plt.setp(axhist.get_yticklabels(), visible=False)
+
+    if outpath is None:
+        plt.show()
+    else:
+        plt.savefig(outpath)
+
+
 def create_matplotlib_plot(
         outpath: Optional[Path],
         title: str,
@@ -515,106 +638,23 @@ def create_matplotlib_plot(
     bins: int
         Number of bins for value histograms
     """
-    start = 1 if skipfirst else 0
-    xdata = np.array(xdata[start:], copy=True)
-    ydata = np.array(ydata[start:], copy=True)
-    if trimxvalues:
-        minx = min(xdata)
-        xdata = [x - minx for x in xdata]
-    fig, (axplot, axhist) = plt.subplots(
-        ncols=2,
-        tight_layout=True,
-        figsize=figsize,
-        sharey=True,
-        gridspec_kw={'width_ratios': (8, 3)}
+
+    create_multiple_matplotlib_plot(
+        1,
+        outpath,
+        title,
+        None,
+        [xtitle],
+        [xunit],
+        [ytitle],
+        [yunit],
+        xdata,
+        [ydata],
+        trimxvalues,
+        skipfirst,
+        figsize,
+        bins
     )
-    fig.suptitle(title, fontsize='x-large')
-    axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
-    xlabel = xtitle
-    if xunit is not None:
-        xlabel += f' [{xunit}]'
-    ylabel = ytitle
-    if yunit is not None:
-        ylabel += f' [{yunit}]'
-    axplot.set_xlabel(xlabel, fontsize='large')
-    axplot.set_ylabel(ylabel, fontsize='large')
-    axplot.grid()
-
-    axhist.hist(ydata, bins=bins, orientation='horizontal', color='purple')
-    axhist.set_xscale('log')
-    axhist.set_xlabel('Value histogram', fontsize='large')
-    axhist.grid(which='both')
-    plt.setp(axhist.get_yticklabels(), visible=False)
-
-    if outpath is None:
-        plt.show()
-    else:
-        plt.savefig(outpath)
-
-
-def create_multiple_matplotlib_plot(
-        plotsnumber: int,
-        outpath: Optional[Path],
-        title: str,
-        subtitles: List[str],
-        xtitles: List[str],
-        xunits: List[str],
-        ytitles: List[str],
-        yunits: List[str],
-        xdata: List,
-        ydatas: List,
-        trimxvalues: bool = True,
-        skipfirst: bool = False,
-        figsize: Tuple = (1500, 1080),
-        bins: int = 20):
-
-    start = 1 if skipfirst else 0
-    xdata = np.array(xdata[start:], copy=True)
-    for ydata in ydatas:
-        ydata = np.array(ydata[start:], copy=True)
-    if trimxvalues:
-        minx = min(xdata)
-        xdata = [x - minx for x in xdata]
-    fig, axs = plt.subplots(
-        ncols=2,
-        nrows=plotsnumber,
-        tight_layout=True,
-        figsize=figsize,
-        sharey=True,
-        gridspec_kw={'width_ratios': (8, 3)}
-    )
-    fig.suptitle(title, fontsize='x-large')
-
-    for ydata, axplot, subtitle in zip(ydatas, axs[:, 0], subtitles):
-        axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
-        axplot.set_title(subtitle)
-
-    xlabels = xtitles
-    for xunit, xlabel in zip(xunits, xlabels):
-        if xunits is not None:
-            xlabel += f' [{xunit}]'
-
-    ylabels = ytitles
-    for yunit, ylabel in zip(yunits, ylabels):
-        if yunits is not None:
-            ylabel += f' [{yunit}]'
-
-    for xlabel, ylabel, axplot in zip(xlabels, ylabels, axs[:, 0]):
-        axplot.set_xlabel(xlabel, fontsize='large')
-        axplot.set_ylabel(ylabel, fontsize='large')
-        axplot.grid()
-
-    for ydata, axhist in zip(ydatas, axs[:, 1]):
-        axhist.hist(ydata, bins=bins, orientation='horizontal', color='purple')
-        axhist.set_xscale('log')
-        axhist.set_xlabel('Value histogram', fontsize='large')
-        axhist.grid(which='both')
-        plt.setp(axhist.get_yticklabels(), visible=False)
-
-    if outpath is None:
-        plt.show()
-    else:
-        plt.savefig(outpath)
 
 
 def render_time_series_plot_with_histogram(
@@ -686,6 +726,9 @@ def render_time_series_plot_with_histogram(
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
+    backend: str
+        "bokeh" for rendering png/svg plot using Bokeh
+        "matplotlib" for rendering png/svg plot using Matplotlib
     """
 
     ts_plot = time_series_plot(
@@ -818,8 +861,10 @@ def render_multiple_time_series_plot(
         "png" for PNG file,
         "svg" for SVG file,
         "txt" for TXT file
-    titles : List[str]
+    title : List[str]
         Title of the plot
+    subtitles : List[str]
+        Titles of the subplots
     xtitles : List[str]
         Name of the X axis
     xuints : List[str]
@@ -828,9 +873,9 @@ def render_multiple_time_series_plot(
         Name of the Y axis
     yunits : List[str]
         Unit for the Y axis
-    xdatas : List
+    xdata : List
         The values for X dimension
-    ydata : List
+    ydatas : List
         The values for Y dimension
     xrange : Optional[Tuple]
         The range of zoom on X axis
@@ -851,6 +896,9 @@ def render_multiple_time_series_plot(
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
+    backend: str
+        "bokeh" for rendering png/svg plot using Bokeh
+        "matplotlib" for rendering png/svg plot using Matplotlib
     """
 
     ts_plots = []
