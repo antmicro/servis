@@ -68,7 +68,7 @@ def add_tags(
         plot: bkfigure,
         tags: List[Dict],
         tagstype: str = "single",
-        trimvaluesoffset: float = 0,
+        trimxvaluesoffset: float = 0,
         max_y_value: float = 100,
         min_y_value: float = 0,
         yrange: Optional[Tuple] = None):
@@ -85,7 +85,7 @@ def add_tags(
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
-    trimvaluesoffset: float
+    trimxvaluesoffset: float
         The number by which the values will be trimmed
     max_y_value: float
         The highest value in ydata
@@ -103,7 +103,7 @@ def add_tags(
         trimmed_tagstimestamps = list()
         for t in tags:
             trimmed_tagstimestamps.append({'name': t['name'],
-                                           'timestamp': t['timestamp']+trimvaluesoffset})  # noqa: 501
+                                           'timestamp': t['timestamp']+trimxvaluesoffset})  # noqa: 501
         tags = trimmed_tagstimestamps
 
         for t in tags:
@@ -140,8 +140,8 @@ def add_tags(
         trimmed_tagstimestamps = list()
         for t in tags:
             trimmed_tagstimestamps.append({'name': t['name'],
-                                           'start': t['start']+trimvaluesoffset,  # noqa: 501
-                                           'end': t['end']+trimvaluesoffset})
+                                           'start': t['start']+trimxvaluesoffset,  # noqa: 501
+                                           'end': t['end']+trimxvaluesoffset})
             tags = trimmed_tagstimestamps
 
         tags_names = list()
@@ -192,7 +192,7 @@ def time_series_plot(
         ydata: List,
         xrange: Optional[Tuple] = None,
         yrange: Optional[Tuple] = None,
-        trimxvalues: bool = True,
+        trimxvaluesoffset: float = 0.0,
         figsize: Tuple = (1500, 850),
         tags: List = [],
         tagstype: str = 'single',
@@ -223,9 +223,8 @@ def time_series_plot(
         The range of zoom on X axis
     yrange : Optional[Tuple]
         The range of zoom on Y axis
-    trimxvalues : bool
-        True if all values for the X dimension should be subtracted by
-        the minimal value on this dimension
+    trimxvaluesoffset : float
+        Value of the minimum x before trimming
     figsize: Tuple
         The size of the figure
     tags: list
@@ -244,10 +243,6 @@ def time_series_plot(
     plot: bkfigure
         Returns time series plot
     """
-    minx = 0
-    if trimxvalues:
-        minx = min(xdata)
-        xdata = [x - minx for x in xdata]
 
     xlabel = xtitle
     if xunit is not None:
@@ -276,7 +271,7 @@ def time_series_plot(
         plot = add_tags(plot,
                         tags,
                         tagstype,
-                        trimvaluesoffset=-minx,
+                        trimxvaluesoffset=-trimxvaluesoffset,
                         max_y_value=max(ydata),
                         min_y_value=min(ydata),
                         yrange=yrange)
@@ -367,7 +362,6 @@ def create_ascii_plot(
         ydata: List,
         x_range: Optional[Tuple] = (0, 10),
         y_range: Optional[Tuple] = (0, 100),
-        trimxvalues: bool = True,
         figsize: Optional[Tuple] = None,
         switchtobarchart: bool = False,
         canvas_color='black',
@@ -398,9 +392,6 @@ def create_ascii_plot(
         The range of zoom on X axis
     yrange : Optional[Tuple]
         The range of zoom on Y axis
-    trimxvalues : bool
-        True if all values for the X dimension should be subtracted by
-        the minimal value on this dimension
     figsize: Optional[Tuple]
         The size of the figure
     switchtobarchart:
@@ -414,10 +405,6 @@ def create_ascii_plot(
     """
 
     plotext.clear_figure()
-
-    if trimxvalues:
-        minx = min(xdata)
-        xdata = [x - minx for x in xdata]
 
     plotext.date_form('H:M:S')
     xdata = [datetime.datetime.fromtimestamp(
@@ -462,7 +449,6 @@ def create_multiple_matplotlib_plot(
         yunits: List[str],
         xdata: List,
         ydatas: List,
-        trimxvalues: bool = True,
         figsize: Tuple = (1500, 1080),
         bins: int = 20):
     """
@@ -493,18 +479,12 @@ def create_multiple_matplotlib_plot(
         The values for X dimension
     ydatas : List
         The values for Y dimension
-    trimxvalues : bool
-        True if all values for the X dimension should be subtracted by
-        the minimal value on this dimension
     figsize: Tuple
         The size of the figure
     bins: int
         Number of bins for value histograms
     """
 
-    if trimxvalues:
-        minx = min(xdata)
-        xdata = [x - minx for x in xdata]
     fig, axs = plt.subplots(
         ncols=2,
         nrows=plotsnumber,
@@ -517,7 +497,7 @@ def create_multiple_matplotlib_plot(
 
     if plotsnumber == 1:
         axplot = axs[0]
-        axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
+        axplot.scatter(xdata, ydatas[0], c='purple', alpha=0.5)
     else:
         for ydata, axplot in zip(ydatas, axs[:, 0]):
             axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
@@ -542,7 +522,7 @@ def create_multiple_matplotlib_plot(
         axplot.grid()
 
         axhist = axs[1]
-        axhist.hist(ydata, bins=bins, orientation='horizontal', color='purple')
+        axhist.hist(ydatas[0], bins=bins, orientation='horizontal', color='purple')
         axhist.set_xscale('log')
         axhist.set_xlabel('Value histogram', fontsize='large')
         axhist.grid(which='both')
@@ -576,7 +556,6 @@ def create_matplotlib_plot(
         yunit: str,
         xdata: List,
         ydata: List,
-        trimxvalues: bool = True,
         figsize: Tuple = (15, 8.5),
         bins: int = 20):
     """
@@ -603,9 +582,6 @@ def create_matplotlib_plot(
         The values for X dimension
     ydata : List
         The values for Y dimension
-    trimxvalues : bool
-        True if all values for the X dimension should be subtracted by
-        the minimal value on this dimension
     figsize: Tuple
         The size of the figure
     bins: int
@@ -623,7 +599,6 @@ def create_matplotlib_plot(
         [yunit],
         xdata,
         [ydata],
-        trimxvalues,
         figsize,
         bins
     )
@@ -707,6 +682,11 @@ def render_time_series_plot_with_histogram(
     xdata = np.array(xdata[start:], copy=True)
     ydata = np.array(ydata[start:], copy=True)
 
+    minx = 0
+    if trimxvalues:
+        minx = min(xdata)
+        xdata = [x - minx for x in xdata]
+
     ts_plot = time_series_plot(
         title,
         xtitle,
@@ -717,7 +697,7 @@ def render_time_series_plot_with_histogram(
         ydata,
         xrange,
         yrange,
-        trimxvalues,
+        minx,
         # plots should be in a ratio of 8:3
         figsize=(figsize[0]*8/11, figsize[1]),
         tags=tags,
@@ -745,8 +725,7 @@ def render_time_series_plot_with_histogram(
             xdata,
             ydata,
             xrange,
-            yrange,
-            trimxvalues
+            yrange
         )
 
     if "html" in outputext:
@@ -765,7 +744,6 @@ def render_time_series_plot_with_histogram(
             yunit,
             xdata,
             ydata,
-            trimxvalues,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
@@ -779,7 +757,6 @@ def render_time_series_plot_with_histogram(
             yunit,
             xdata,
             ydata,
-            trimxvalues,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
@@ -876,6 +853,11 @@ def render_multiple_time_series_plot(
     for ydata in ydatas:
         ydata = np.array(ydata[start:], copy=True)
 
+    if trimxvalues:
+        minx = min(xdata)
+        xdata = [x - minx for x in xdata]
+
+
     ts_plots = []
     val_histograms = []
 
@@ -890,7 +872,7 @@ def render_multiple_time_series_plot(
             ydata,
             xrange,
             yrange,
-            trimxvalues=trimxvalues,
+            trimxvaluesoffset=minx,
             # plots should be in a ratio of 8:3
             figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
             data_colors=get_colors(ydata[0:-1]),
@@ -931,7 +913,6 @@ def render_multiple_time_series_plot(
                 ydata,
                 x_range=xrange,
                 y_range=yrange,
-                trimxvalues=trimxvalues,
                 figsize=figsize,
                 switchtobarchart=switchtobarchart
             )
@@ -953,7 +934,6 @@ def render_multiple_time_series_plot(
             yunits,
             xdata,
             ydatas,
-            trimxvalues,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
@@ -970,7 +950,6 @@ def render_multiple_time_series_plot(
             yunits,
             xdata,
             ydatas,
-            trimxvalues,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
