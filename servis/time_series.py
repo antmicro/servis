@@ -193,7 +193,6 @@ def time_series_plot(
         xrange: Optional[Tuple] = None,
         yrange: Optional[Tuple] = None,
         trimxvalues: bool = True,
-        skipfirst: bool = False,
         figsize: Tuple = (1500, 850),
         tags: List = [],
         tagstype: str = 'single',
@@ -227,8 +226,6 @@ def time_series_plot(
     trimxvalues : bool
         True if all values for the X dimension should be subtracted by
         the minimal value on this dimension
-    skipfirst: bool
-        True if the first entry should be removed from plotting.
     figsize: Tuple
         The size of the figure
     tags: list
@@ -248,9 +245,6 @@ def time_series_plot(
         Returns time series plot
     """
     minx = 0
-    start = 1 if skipfirst else 0
-    xdata = np.array(xdata[start:], copy=True)
-    ydata = np.array(ydata[start:], copy=True)
     if trimxvalues:
         minx = min(xdata)
         xdata = [x - minx for x in xdata]
@@ -310,7 +304,6 @@ def time_series_plot(
 def value_histogram(
         ydata: List,
         yrange: Optional[Range1d] = None,
-        skipfirst: bool = False,
         figsize: Tuple = (1500, 850),
         bins: int = 20,
         setgradientcolors: bool = False):
@@ -324,8 +317,6 @@ def value_histogram(
         The values for Y dimension
     yrange : Optional[Tuple]
         The range of zoom on Y axis
-    skipfirst: bool
-        True if the first entry should be removed from plotting.
     figsize: Tuple
         The size of the figure
     bins: int
@@ -339,8 +330,6 @@ def value_histogram(
     plot: bkfigure
         the histogram with logarithmic scale on x-axis
     """
-    start = 1 if skipfirst else 0
-    ydata = np.array(ydata[start:], copy=True)
 
     plot = bkfigure(plot_width=int(figsize[0]),
                     plot_height=figsize[1],
@@ -379,7 +368,6 @@ def create_ascii_plot(
         x_range: Optional[Tuple] = (0, 10),
         y_range: Optional[Tuple] = (0, 100),
         trimxvalues: bool = True,
-        skipfirst: bool = False,
         figsize: Optional[Tuple] = None,
         switchtobarchart: bool = False,
         canvas_color='black',
@@ -413,8 +401,6 @@ def create_ascii_plot(
     trimxvalues : bool
         True if all values for the X dimension should be subtracted by
         the minimal value on this dimension
-    skipfirst: bool
-        True if the first entry should be removed from plotting.
     figsize: Optional[Tuple]
         The size of the figure
     switchtobarchart:
@@ -428,9 +414,6 @@ def create_ascii_plot(
     """
 
     plotext.clear_figure()
-    start = 1 if skipfirst else 0
-    xdata = np.array(xdata[start:], copy=True)
-    ydata = np.array(ydata[start:], copy=True)
 
     if trimxvalues:
         minx = min(xdata)
@@ -480,7 +463,6 @@ def create_multiple_matplotlib_plot(
         xdata: List,
         ydatas: List,
         trimxvalues: bool = True,
-        skipfirst: bool = False,
         figsize: Tuple = (1500, 1080),
         bins: int = 20):
     """
@@ -514,18 +496,12 @@ def create_multiple_matplotlib_plot(
     trimxvalues : bool
         True if all values for the X dimension should be subtracted by
         the minimal value on this dimension
-    skipfirst: bool
-        True if the first entry should be removed from plotting.
     figsize: Tuple
         The size of the figure
     bins: int
         Number of bins for value histograms
     """
 
-    start = 1 if skipfirst else 0
-    xdata = np.array(xdata[start:], copy=True)
-    for ydata in ydatas:
-        ydata = np.array(ydata[start:], copy=True)
     if trimxvalues:
         minx = min(xdata)
         xdata = [x - minx for x in xdata]
@@ -601,7 +577,6 @@ def create_matplotlib_plot(
         xdata: List,
         ydata: List,
         trimxvalues: bool = True,
-        skipfirst: bool = False,
         figsize: Tuple = (15, 8.5),
         bins: int = 20):
     """
@@ -631,8 +606,6 @@ def create_matplotlib_plot(
     trimxvalues : bool
         True if all values for the X dimension should be subtracted by
         the minimal value on this dimension
-    skipfirst: bool
-        True if the first entry should be removed from plotting.
     figsize: Tuple
         The size of the figure
     bins: int
@@ -651,7 +624,6 @@ def create_matplotlib_plot(
         xdata,
         [ydata],
         trimxvalues,
-        skipfirst,
         figsize,
         bins
     )
@@ -731,6 +703,10 @@ def render_time_series_plot_with_histogram(
         "matplotlib" for rendering png/svg plot using Matplotlib
     """
 
+    start = 1 if skipfirst else 0
+    xdata = np.array(xdata[start:], copy=True)
+    ydata = np.array(ydata[start:], copy=True)
+
     ts_plot = time_series_plot(
         title,
         xtitle,
@@ -742,7 +718,6 @@ def render_time_series_plot_with_histogram(
         xrange,
         yrange,
         trimxvalues,
-        skipfirst,
         # plots should be in a ratio of 8:3
         figsize=(figsize[0]*8/11, figsize[1]),
         tags=tags,
@@ -752,7 +727,6 @@ def render_time_series_plot_with_histogram(
     val_hist = value_histogram(
         ydata,
         ts_plot.y_range,
-        skipfirst,
         # plots should be in a ratio of 8:3
         figsize=(figsize[0]*3/11, figsize[1]),
         bins=bins
@@ -772,8 +746,7 @@ def render_time_series_plot_with_histogram(
             ydata,
             xrange,
             yrange,
-            trimxvalues,
-            skipfirst
+            trimxvalues
         )
 
     if "html" in outputext:
@@ -793,7 +766,6 @@ def render_time_series_plot_with_histogram(
             xdata,
             ydata,
             trimxvalues,
-            skipfirst,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
@@ -808,7 +780,6 @@ def render_time_series_plot_with_histogram(
             xdata,
             ydata,
             trimxvalues,
-            skipfirst,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
@@ -900,6 +871,10 @@ def render_multiple_time_series_plot(
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
     """
+    start = 1 if skipfirst else 0
+    xdata = np.array(xdata[start:], copy=True)
+    for ydata in ydatas:
+        ydata = np.array(ydata[start:], copy=True)
 
     ts_plots = []
     val_histograms = []
@@ -916,7 +891,6 @@ def render_multiple_time_series_plot(
             xrange,
             yrange,
             trimxvalues=trimxvalues,
-            skipfirst=skipfirst,
             # plots should be in a ratio of 8:3
             figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
             data_colors=get_colors(ydata[0:-1]),
@@ -928,7 +902,6 @@ def render_multiple_time_series_plot(
         val_histograms.append(value_histogram(
             list(np.float_(ydata)),
             ts_plots[-1].y_range,
-            skipfirst,
             # plots should be in a ratio of 8:3
             figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
             bins=bins,
@@ -959,7 +932,6 @@ def render_multiple_time_series_plot(
                 x_range=xrange,
                 y_range=yrange,
                 trimxvalues=trimxvalues,
-                skipfirst=skipfirst,
                 figsize=figsize,
                 switchtobarchart=switchtobarchart
             )
@@ -982,7 +954,6 @@ def render_multiple_time_series_plot(
             xdata,
             ydatas,
             trimxvalues,
-            skipfirst,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
@@ -1000,7 +971,6 @@ def render_multiple_time_series_plot(
             xdata,
             ydatas,
             trimxvalues,
-            skipfirst,
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
         )
