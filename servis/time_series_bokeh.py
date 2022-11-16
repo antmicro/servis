@@ -8,7 +8,6 @@ from pathlib import Path
 from bokeh.layouts import gridplot
 
 
-
 def get_colors(data: List):
     """
     Generates list of colors for elements in data,
@@ -419,7 +418,6 @@ def create_bokeh_plot(
         "double" if given list contain tags with two (start and end)
         timestamps.
     """
-
 
     ts_plots = []
     val_histograms = []

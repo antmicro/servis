@@ -1,6 +1,7 @@
 from typing import List, Tuple, Optional
 import datetime
 
+
 def create_ascii_plot(
         title: str,
         xtitle: str,
