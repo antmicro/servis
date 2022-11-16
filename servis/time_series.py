@@ -78,6 +78,56 @@ def create_bokeh_plot(
         tags: List[Dict] = [],
         tagstype: str = "single",
         setgradientcolors: bool = False):
+    """
+    Draws and saves time series plot using Bokeh
+
+    Parameters
+    ----------
+    plotsnumber: int
+        Number of time series plots in the figure.
+    outpath : Optional[Path]
+        Output path for the plot image. If None, the plot will be displayed.
+    outputext: List[str]
+        Extension of generated file.
+        "html" for HTML file,
+        "png" for PNG file,
+        "svg" for SVG file,
+        "txt" for TXT file
+    title : List[str]
+        Title of the plot
+    subtitles : List[str]
+        Titles of the subplots
+    xtitles : List[str]
+        Name of the X axis
+    xuints : List[str]
+        Unit for the X axis
+    ytitles : List[str]
+        Name of the Y axis
+    yunits : List[str]
+        Unit for the Y axis
+    xdata : List
+        The values for X dimension
+    ydatas : List
+        The values for Y dimension
+    xrange : Optional[Tuple]
+        The range of zoom on X axis
+    yrange : Optional[Tuple]
+        The range of zoom on Y axis
+    trimxvaluesoffset: float
+        The number by which the tags timestamps values will be trimmed
+    figsize: Tuple
+        The size of the figure
+    bins: int
+        Number of bins for value histograms
+    switchtobarchart:
+        True if you want to change the plot type to barchart
+    tags: list
+        List of tags and their timestamps
+    tagstype: str
+        "single" if given list contain tags with only one timestamp
+        "double" if given list contain tags with two (start and end)
+        timestamps.
+    """
 
     from bokeh.plotting import output_file, show, save, figure as bkfigure
     from bokeh.layouts import gridplot
@@ -161,8 +211,8 @@ def create_bokeh_plot(
             trimmed_tagstimestamps = list()
             for t in tags:
                 trimmed_tagstimestamps.append({'name': t['name'],
-                                            'start': t['start']+trimxvaluesoffset,  # noqa: 501
-                                            'end': t['end']+trimxvaluesoffset})
+                                               'start': t['start']+trimxvaluesoffset,  # noqa: 501
+                                               'end': t['end']+trimxvaluesoffset})  # noqa: 501
                 tags = trimmed_tagstimestamps
 
             tags_names = list()
@@ -243,8 +293,8 @@ def create_bokeh_plot(
             The range of zoom on X axis
         yrange : Optional[Tuple]
             The range of zoom on Y axis
-        trimxvaluesoffset : float
-            Value of the minimum x before trimming
+        trimxvaluesoffset: float
+            The number by which the values will be trimmed
         figsize: Tuple
             The size of the figure
         tags: list
@@ -253,10 +303,11 @@ def create_bokeh_plot(
             "single" if given list contain tags with only one timestamp
             "double" if given list contain tags with two (start and end)
             timestamps.
-        data_colors:
-            List of colors for which the data in the plot will be colored
+        setgradientcolors:
+            True if gradient colors from turquoise to raspberry red
+            instead of one color should be set. False otherwise.
         switchtobarchart:
-            True if we want to change the plot type to barchart
+            True if you want to change the plot type to barchart
 
         Returns
         -------
