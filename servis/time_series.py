@@ -103,7 +103,22 @@ def render_time_series_plot_with_histogram(
             yrange
         )
 
-    if ("png" in outputext or "svg" in outputext) and backend == "matplotlib":
+    if "png" in outputext and backend == "matplotlib":
+        from servis.time_series_matplotlib import create_matplotlib_plot
+        create_matplotlib_plot(
+            f'{outpath}.png',
+            title,
+            xtitle,
+            xunit,
+            ytitle,
+            yunit,
+            xdata,
+            ydata,
+            figsize=(figsize[0]/100, figsize[1]/100),
+            bins=bins
+        )
+
+    if "svg" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib import create_matplotlib_plot
         create_matplotlib_plot(
             f'{outpath}.svg',
@@ -118,7 +133,32 @@ def render_time_series_plot_with_histogram(
             bins=bins
         )
 
-    if backend == "bokeh" or "html" in outputext:
+
+    if "html" in outputext:
+        from servis.time_series_bokeh import create_bokeh_plot
+        create_bokeh_plot(
+            plotsnumber=1,
+            outpath=outpath,
+            outputext=["html"],
+            title="",
+            subtitles=[title],
+            xtitles=[xtitle],
+            xunits=[xunit],
+            ytitles=[ytitle],
+            yunits=[yunit],
+            xdata=xdata,
+            ydatas=[ydata],
+            xrange=xrange,
+            yrange=yrange,
+            trimxvaluesoffset=minx,
+            switchtobarchart=False,
+            figsize=figsize,
+            bins=bins,
+            tags=tags,
+            tagstype=tagstype
+        )
+
+    if backend == "bokeh":
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
             plotsnumber=1,
@@ -252,7 +292,7 @@ def render_multiple_time_series_plot(
             )
             print('\n\n')
 
-    if ("png" in outputext or "svg" in outputext) and backend == "matplotlib":
+    if "png" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib import create_multiple_matplotlib_plot  # noqa: E501
         create_multiple_matplotlib_plot(
             plotsnumber,
@@ -269,7 +309,48 @@ def render_multiple_time_series_plot(
             bins=bins
         )
 
-    if backend == "bokeh" or "html" in outputext:
+    if "svg" in outputext and backend == "matplotlib":
+        from servis.time_series_matplotlib import create_multiple_matplotlib_plot  # noqa: E501
+        create_multiple_matplotlib_plot(
+            plotsnumber,
+            f'{outpath}.svg',
+            title,
+            subtitles,
+            xtitles,
+            xunits,
+            ytitles,
+            yunits,
+            xdata,
+            ydatas,
+            figsize=(figsize[0]/100, figsize[1]/100),
+            bins=bins
+        )
+
+    if "html" in outputext:
+        from servis.time_series_bokeh import create_bokeh_plot
+        create_bokeh_plot(
+            plotsnumber,
+            outpath,
+            ["html"],
+            title,
+            subtitles,
+            xtitles,
+            xunits,
+            ytitles,
+            yunits,
+            xdata,
+            ydatas,
+            xrange,
+            yrange,
+            minx,
+            figsize,
+            bins,
+            switchtobarchart,
+            tags,
+            tagstype,
+            setgradientcolors=True
+        )
+    if backend == "bokeh":
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
             plotsnumber,
