@@ -23,6 +23,7 @@ def render_time_series_plot_with_histogram(
         skipfirst: bool = False,
         figsize: Tuple = (1500, 850),
         bins: int = 20,
+        is_x_timestamp: bool = True,
         tags: List = [],
         tagstype: str = "single",
         backend: str = "bokeh"):
@@ -70,6 +71,10 @@ def render_time_series_plot_with_histogram(
         The size of the figure
     bins: int
         Number of bins for value histograms
+    is_x_timestamp:
+        Used in txt plot.
+        True if x should be a timestamp,
+        False if x should be converted to datetime
     tags: list
         List of tags and their timestamps
     tagstype: str
@@ -100,7 +105,8 @@ def render_time_series_plot_with_histogram(
             xdata,
             ydata,
             xrange,
-            yrange
+            yrange,
+            is_x_timestamp=is_x_timestamp
         )
 
     if "png" in outputext and backend == "matplotlib":
@@ -201,6 +207,7 @@ def render_multiple_time_series_plot(
         skipfirst: bool = False,
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
+        is_x_timestamp: bool = True,
         switchtobarchart: bool = True,
         tags: List[Dict] = [],
         tagstype: str = "single",
@@ -254,6 +261,10 @@ def render_multiple_time_series_plot(
         The size of the figure
     bins: int
         Number of bins for value histograms
+    is_x_timestamp:
+        Used in txt plot.
+        True if x should be a timestamp,
+        False if x should be converted to datetime
     tags: list
         List of tags and their timestamps
     tagstype: str
@@ -288,7 +299,8 @@ def render_multiple_time_series_plot(
                 x_range=xrange,
                 y_range=yrange,
                 figsize=figsize,
-                switchtobarchart=switchtobarchart
+                switchtobarchart=switchtobarchart,
+                is_x_timestamp=is_x_timestamp
             )
             print('\n\n')
 

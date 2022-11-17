@@ -14,6 +14,7 @@ def create_ascii_plot(
         y_range: Optional[Tuple] = (0, 100),
         figsize: Optional[Tuple] = None,
         switchtobarchart: bool = False,
+        is_x_timestamp: bool = True,
         canvas_color='black',
         axes_color='black',
         ticks_color='white'):
@@ -46,6 +47,9 @@ def create_ascii_plot(
         The size of the figure
     switchtobarchart:
         True if we want to change the plot type to barchart
+    is_x_timestamp:
+        True if x should be a timestamp,
+        False if x should be converted to datetime
     canvas_color:
         Name of color of the plot background
     axes_color:
@@ -57,8 +61,10 @@ def create_ascii_plot(
     plotext.clear_figure()
 
     plotext.date_form('H:M:S')
-    xdata = [datetime.datetime.fromtimestamp(
-        x).strftime("%H:%M:%S") for x in xdata]
+
+    if is_x_timestamp is False:
+        xdata = [datetime.datetime.fromtimestamp(
+            x).strftime("%H:%M:%S") for x in xdata]
 
     xlabel = xtitle
     if xunit is not None:
