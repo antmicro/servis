@@ -4,15 +4,15 @@ from pathlib import Path
 
 def create_multiple_matplotlib_plot(
         plotsnumber: int,
-        outpath: Optional[Path],
         title: str,
         subtitles: Optional[List[str]],
+        xdata: List,
+        ydatas: List,
         xtitles: List[str],
         xunits: List[str],
         ytitles: List[str],
         yunits: List[str],
-        xdata: List,
-        ydatas: List,
+        outpath: Optional[Path] = None,
         figsize: Tuple = (1500, 1080),
         bins: int = 20):
     """
@@ -25,12 +25,13 @@ def create_multiple_matplotlib_plot(
     ----------
     plotsnumber: int
         Number of time series plots in the figure.
-    outpath : Optional[Path]
-        Output path for the plot image. If None, the plot will be displayed.
-    title : List[str]
         Title of the plot
     subtitles : List[str]
         Titles of the subplots
+    xdata : List
+        The values for X dimension
+    ydatas : List
+        The values for Y dimension
     xtitles : List[str]
         Name of the X axis
     xuints : List[str]
@@ -39,10 +40,9 @@ def create_multiple_matplotlib_plot(
         Name of the Y axis
     yunits : List[str]
         Unit for the Y axis
-    xdata : List
-        The values for X dimension
-    ydatas : List
-        The values for Y dimension
+    outpath : Optional[Path]
+        Output path for the plot image. If None, the plot will be displayed.
+    title : List[str]
     figsize: Tuple
         The size of the figure
     bins: int
@@ -114,14 +114,14 @@ def create_multiple_matplotlib_plot(
 
 
 def create_matplotlib_plot(
-        outpath: Optional[Path],
         title: str,
+        xdata: List,
+        ydata: List,
         xtitle: str,
         xunit: str,
         ytitle: str,
         yunit: str,
-        xdata: List,
-        ydata: List,
+        outpath: Optional[Path] = None,
         figsize: Tuple = (15, 8.5),
         bins: int = 20):
     """
@@ -132,10 +132,12 @@ def create_matplotlib_plot(
 
     Parameters
     ----------
-    outpath : Optional[Path]
-        Output path for the plot image. If None, the plot will be displayed.
     title : str
         Title of the plot
+    xdata : List
+        The values for X dimension
+    ydata : List
+        The values for Y dimension
     xtitle : str
         Name of the X axis
     xuint : str
@@ -144,10 +146,8 @@ def create_matplotlib_plot(
         Name of the Y axis
     yunit : str
         Unit for the Y axis
-    xdata : List
-        The values for X dimension
-    ydata : List
-        The values for Y dimension
+    outpath : Optional[Path]
+        Output path for the plot image. If None, the plot will be displayed.
     figsize: Tuple
         The size of the figure
     bins: int
@@ -156,15 +156,15 @@ def create_matplotlib_plot(
 
     create_multiple_matplotlib_plot(
         1,
-        outpath,
         title,
         None,
+        xdata,
+        [ydata],
         [xtitle],
         [xunit],
         [ytitle],
         [yunit],
-        xdata,
-        [ydata],
+        outpath,
         figsize,
         bins
     )

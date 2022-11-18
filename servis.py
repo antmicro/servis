@@ -5,16 +5,18 @@ import sys
 import numpy as np
 from servis import render_time_series_plot_with_histogram
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('infile', type=argparse.FileType('r'), nargs='?', default=sys.stdin)
+    parser.add_argument('infile', type=argparse.FileType(
+        'r'), nargs='?', default=sys.stdin)
     args = parser.parse_args()
 
     x_values = list()
     y_values = list()
 
     for line in args.infile:
-        if line == '\n': 
+        if line == '\n':
             continue
         y = int(line.split(" ")[0])
         y_values.append(y)
@@ -26,14 +28,12 @@ def main():
 
     render_time_series_plot_with_histogram(
         "",
-        ["txt"],
-        "",
-        None,
-        None,
-        None,
-        None,
         x_values,
-        y_values
+        y_values,
+        None,
+        None,
+        None,
+        None
     )
 
 

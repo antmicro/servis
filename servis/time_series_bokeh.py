@@ -177,12 +177,12 @@ def add_tags(
 
 def time_series_plot(
         title: str,
+        xdata: List,
+        ydata: List,
         xtitle: str,
         xunit: str,
         ytitle: str,
         yunit: str,
-        xdata: List,
-        ydata: List,
         xrange: Optional[Tuple] = None,
         yrange: Optional[Tuple] = None,
         trimxvaluesoffset: float = 0.0,
@@ -200,6 +200,10 @@ def time_series_plot(
     ----------
     title : str
         Title of the plot
+    xdata : List
+        The values for X dimension
+    ydata : List
+        The values for Y dimension
     xtitle : str
         Name of the X axis
     xuint : str
@@ -208,10 +212,6 @@ def time_series_plot(
         Name of the Y axis
     yunit : str
         Unit for the Y axis
-    xdata : List
-        The values for X dimension
-    ydata : List
-        The values for Y dimension
     xrange : Optional[Tuple]
         The range of zoom on X axis
     yrange : Optional[Tuple]
@@ -349,18 +349,18 @@ def value_histogram(
 
 def create_bokeh_plot(
         plotsnumber: int,
-        outpath: Optional[Path],
-        outputext: Optional[List[str]],
         title: str,
         subtitles: List[str],
+        xdata: List,
+        ydatas: List,
         xtitles: List[str],
         xunits: List[str],
         ytitles: List[str],
         yunits: List[str],
-        xdata: List,
-        ydatas: List,
         xrange: Optional[Tuple] = None,
         yrange: Optional[Tuple] = None,
+        outpath: Optional[Path] = None,
+        outputext: Optional[List[str]] = ['txt'],
         trimxvaluesoffset: float = 0.0,
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
@@ -387,6 +387,10 @@ def create_bokeh_plot(
         Title of the plot
     subtitles : List[str]
         Titles of the subplots
+    xdata : List
+        The values for X dimension
+    ydatas : List
+        The values for Y dimension
     xtitles : List[str]
         Name of the X axis
     xuints : List[str]
@@ -395,10 +399,6 @@ def create_bokeh_plot(
         Name of the Y axis
     yunits : List[str]
         Unit for the Y axis
-    xdata : List
-        The values for X dimension
-    ydatas : List
-        The values for Y dimension
     xrange : Optional[Tuple]
         The range of zoom on X axis
     yrange : Optional[Tuple]
@@ -425,12 +425,12 @@ def create_bokeh_plot(
     for subtitle, xtitle, xunit, ytitle, yunit, ydata in zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):  # noqa: E501
         ts_plots.append(time_series_plot(
             subtitle,
+            xdata,
+            ydata,
             xtitle,
             xunit,
             ytitle,
             yunit,
-            xdata,
-            ydata,
             xrange,
             yrange,
             trimxvaluesoffset=trimxvaluesoffset,

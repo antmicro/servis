@@ -16,15 +16,15 @@ for tag in data["tags"]:
     })
 
 render_time_series_plot_with_histogram(
-    "example_plots/singleplot",
-    ["txt", "html", "png", "svg"],
     "Example plot",
+    xdata,
+    ydata,
     "X axis",
     "unit",
     "Y axis",
     "unit",
-    xdata,
-    ydata,
+    outpath="example_plots/singleplot",
+    outputext=["txt", "html", "png", "svg"],
     tags=tags,
     tagstype="double",
     backend="matplotlib"

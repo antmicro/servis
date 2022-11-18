@@ -17,17 +17,17 @@ for tag in data["tags"]:
 
 render_multiple_time_series_plot(
     2,
-    "example_plots/multipleplot",
-    ["png", "html"],
     "Example plot",
     ["Plot1", "Plot2"],
+    xdata,
+    [ydata1, ydata2],
     ["X axis"]*2,
     ["unit"]*2,
     ["Y axis"]*2,
     ["unit"]*2,
-    xdata,
-    [ydata1, ydata2],
     yrange=(-5, 105),
+    outpath="example_plots/multipleplot",
+    outputext=["png", "html"],
     tags=tags,
     tagstype="single",
     backend="matplotlib"

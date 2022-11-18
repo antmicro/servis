@@ -4,12 +4,12 @@ import datetime
 
 def create_ascii_plot(
         title: str,
+        xdata: List,
+        ydata: List,
         xtitle: str,
         xunit: str,
         ytitle: str,
         yunit: str,
-        xdata: List,
-        ydata: List,
         x_range: Optional[Tuple] = (0, 10),
         y_range: Optional[Tuple] = (0, 100),
         figsize: Optional[Tuple] = None,
@@ -27,6 +27,10 @@ def create_ascii_plot(
     ----------
     title : str
         Title of the plot
+    xdata : List
+        The values for X dimension
+    ydata : List
+        The values for Y dimension
     xtitle : str
         Name of the X axis
     xuint : str
@@ -35,10 +39,6 @@ def create_ascii_plot(
         Name of the Y axis
     yunit : str
         Unit for the Y axis
-    xdata : List
-        The values for X dimension
-    ydata : List
-        The values for Y dimension
     xrange : Optional[Tuple]
         The range of zoom on X axis
     yrange : Optional[Tuple]
