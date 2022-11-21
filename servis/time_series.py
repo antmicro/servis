@@ -2,21 +2,20 @@
 Functions to creating and rendering time series plots in various formats
 """
 
-import numpy as np
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
 
 def render_time_series_plot_with_histogram(
-        title: str,
-        xdata: List,
         ydata: List,
-        xtitle: str,
-        xunit: str,
-        ytitle: str,
-        yunit: str,
-        xrange: Optional[Tuple] = None,
-        yrange: Optional[Tuple] = None,
+        xdata: Optional[List] = None,
+        title: Optional[str] = None,
+        xtitle: Optional[str] = None,
+        xunit: Optional[str] = None,
+        ytitle: Optional[str] = None,
+        yunit: Optional[str] = None,
+        x_range: Optional[Tuple] = None,
+        y_range: Optional[Tuple] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
         trimxvalues: bool = True,
@@ -24,9 +23,10 @@ def render_time_series_plot_with_histogram(
         figsize: Tuple = (1500, 850),
         bins: int = 20,
         is_x_timestamp: bool = True,
+        plottype: str = 'bar',
         tags: List = [],
         tagstype: str = "single",
-        backend: str = "bokeh"):
+        backend: str = "plotext"):
     """
     Draws time series plot.
 
@@ -36,23 +36,23 @@ def render_time_series_plot_with_histogram(
 
     Parameters
     ----------
-    title : str
-        Title of the plot
-    xdata : List
-        The values for X dimension
     ydata : List
         The values for Y dimension
-    xtitle : str
+    xdata : Optional[List]
+        The values for X dimension
+    title : Optional[str]
+        Title of the plot
+    xtitle : Optional[str]
         Name of the X axis
-    xuint : str
+    xuint : Optional[str]
         Unit for the X axis
-    ytitle : str
+    ytitle : Optional[str]
         Name of the Y axis
-    yunit : str
+    yunit : Optional[str]
         Unit for the Y axis
-    xrange : Optional[Tuple]
+    x_range : Optional[Tuple]
         The range of zoom on X axis
-    yrange : Optional[Tuple]
+    y_range : Optional[Tuple]
         The range of zoom on Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
@@ -75,6 +75,8 @@ def render_time_series_plot_with_histogram(
         Used in txt plot.
         True if x should be a timestamp,
         False if x should be converted to datetime
+    plottype: str
+        Type of the plot. Depends on backend
     tags: list
         List of tags and their timestamps
     tagstype: str
@@ -85,9 +87,13 @@ def render_time_series_plot_with_histogram(
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
     """
+    assert backend in ['bokeh', 'matplotlib', 'plotext']
+
+    if xdata is None:
+        xdata = [i for i in range(len(ydata))]
     start = 1 if skipfirst else 0
-    xdata = np.array(xdata[start:], copy=True)
-    ydata = np.array(ydata[start:], copy=True)
+    xdata = xdata[start:]
+    ydata = ydata[start:]
 
     minx = 0
     if trimxvalues:
@@ -97,28 +103,28 @@ def render_time_series_plot_with_histogram(
     if "txt" in outputext:
         from servis.time_series_plotext import create_ascii_plot
         create_ascii_plot(
-            title,
-            xdata,
             ydata,
-            xtitle,
-            xunit,
-            ytitle,
-            yunit,
-            xrange,
-            yrange,
+            xdata,
+            title=title,
+            xtitle=xtitle,
+            xunit=xunit,
+            ytitle=ytitle,
+            yunit=yunit,
+            x_range=x_range,
+            y_range=y_range,
             is_x_timestamp=is_x_timestamp
         )
 
     if "png" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib import create_matplotlib_plot
         create_matplotlib_plot(
-            title,
-            xdata,
             ydata,
-            xtitle,
-            xunit,
-            ytitle,
-            yunit,
+            xdata,
+            title=title,
+            xtitle=xtitle,
+            xunit=xunit,
+            ytitle=ytitle,
+            yunit=yunit,
             outpath=f'{outpath}.png',
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
@@ -127,13 +133,13 @@ def render_time_series_plot_with_histogram(
     if "svg" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib import create_matplotlib_plot
         create_matplotlib_plot(
-            title,
-            xdata,
             ydata,
-            xtitle,
-            xunit,
-            ytitle,
-            yunit,
+            xdata,
+            title=title,
+            xtitle=xtitle,
+            xunit=xunit,
+            ytitle=ytitle,
+            yunit=yunit,
             outpath=f'{outpath}.svg',
             figsize=(figsize[0]/100, figsize[1]/100),
             bins=bins
@@ -142,21 +148,20 @@ def render_time_series_plot_with_histogram(
     if "html" in outputext:
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
-            plotsnumber=1,
-            title="",
-            subtitles=[title],
-            xdata=xdata,
             ydatas=[ydata],
+            xdata=xdata,
+            title=title,
+            subtitles=[title],
             xtitles=[xtitle],
             xunits=[xunit],
             ytitles=[ytitle],
             yunits=[yunit],
-            xrange=xrange,
-            yrange=yrange,
+            x_range=x_range,
+            y_range=y_range,
             outpath=outpath,
             outputext=["html"],
             trimxvaluesoffset=minx,
-            switchtobarchart=False,
+            plottype='scatter',
             figsize=figsize,
             bins=bins,
             tags=tags,
@@ -166,21 +171,20 @@ def render_time_series_plot_with_histogram(
     if backend == "bokeh":
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
-            plotsnumber=1,
-            title="",
-            subtitles=[title],
-            xdata=xdata,
             ydatas=[ydata],
+            xdata=xdata,
+            title=title,
+            subtitles=[title],
             xtitles=[xtitle],
             xunits=[xunit],
             ytitles=[ytitle],
             yunits=[yunit],
-            xrange=xrange,
-            yrange=yrange,
+            x_range=x_range,
+            y_range=y_range,
             outpath=outpath,
             outputext=outputext,
             trimxvaluesoffset=minx,
-            switchtobarchart=False,
+            plottype='scatter',
             figsize=figsize,
             bins=bins,
             tags=tags,
@@ -189,17 +193,16 @@ def render_time_series_plot_with_histogram(
 
 
 def render_multiple_time_series_plot(
-        plotsnumber: int,
+        ydatas: List,
+        xdata: List,
         title: str,
         subtitles: List[str],
-        xdata: List,
-        ydatas: List,
         xtitles: List[str],
         xunits: List[str],
         ytitles: List[str],
         yunits: List[str],
-        xrange: Optional[Tuple] = None,
-        yrange: Optional[Tuple] = None,
+        x_range: Optional[Tuple] = None,
+        y_range: Optional[Tuple] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
         trimxvalues: bool = True,
@@ -207,10 +210,10 @@ def render_multiple_time_series_plot(
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
         is_x_timestamp: bool = True,
-        switchtobarchart: bool = True,
+        plottype: str = 'bar',
         tags: List[Dict] = [],
         tagstype: str = "single",
-        backend: str = "bokeh"):
+        backend: str = "plotext"):
     """
     Draws multiple time series plot.
 
@@ -221,16 +224,14 @@ def render_multiple_time_series_plot(
 
     Parameters
     ----------
-    plotsnumber: int
-        Number of time series plots in the figure.
+    ydatas : List
+        The values for Y dimension
+    xdata : List
+        The values for X dimension
     title : List[str]
         Title of the plot
     subtitles : List[str]
         Titles of the subplots
-    xdata : List
-        The values for X dimension
-    ydatas : List
-        The values for Y dimension
     xtitles : List[str]
         Name of the X axis
     xuints : List[str]
@@ -239,9 +240,9 @@ def render_multiple_time_series_plot(
         Name of the Y axis
     yunits : List[str]
         Unit for the Y axis
-    xrange : Optional[Tuple]
+    x_range : Optional[Tuple]
         The range of zoom on X axis
-    yrange : Optional[Tuple]
+    y_range : Optional[Tuple]
         The range of zoom on Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
@@ -264,6 +265,8 @@ def render_multiple_time_series_plot(
         Used in txt plot.
         True if x should be a timestamp,
         False if x should be converted to datetime
+    plottype: str
+        Type of the plot. Depends on backend
     tags: list
         List of tags and their timestamps
     tagstype: str
@@ -274,10 +277,14 @@ def render_multiple_time_series_plot(
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
     """
+    assert backend in ['bokeh', 'matplotlib', 'plotext']
+
+    if xdata is None:
+        xdata = [i for i in range(len(ydatas[0]))]
     start = 1 if skipfirst else 0
-    xdata = np.array(xdata[start:], copy=True)
+    xdata = xdata[start:]
     for ydata in ydatas:
-        ydata = np.array(ydata[start:], copy=True)
+        ydata = ydata[start:]
 
     if trimxvalues:
         minx = min(xdata)
@@ -288,17 +295,17 @@ def render_multiple_time_series_plot(
         from servis.time_series_plotext import create_ascii_plot
         for title, xtitle, xunit, ytitle, yunit, ydata in zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):  # noqa: E501
             create_ascii_plot(
+                ydata=ydata,
+                xdata=xdata,
                 title=title,
                 xtitle=xtitle,
                 xunit=xunit,
                 ytitle=ytitle,
                 yunit=yunit,
-                xdata=xdata,
-                ydata=ydata,
-                x_range=xrange,
-                y_range=yrange,
+                x_range=x_range,
+                y_range=y_range,
                 figsize=figsize,
-                switchtobarchart=switchtobarchart,
+                plottype=plottype,
                 is_x_timestamp=is_x_timestamp
             )
             print('\n\n')
@@ -306,11 +313,10 @@ def render_multiple_time_series_plot(
     if "png" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib import create_multiple_matplotlib_plot  # noqa: E501
         create_multiple_matplotlib_plot(
-            plotsnumber,
+            ydatas,
+            xdata,
             title,
             subtitles,
-            xdata,
-            ydatas,
             xtitles,
             xunits,
             ytitles,
@@ -323,11 +329,10 @@ def render_multiple_time_series_plot(
     if "svg" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib import create_multiple_matplotlib_plot  # noqa: E501
         create_multiple_matplotlib_plot(
-            plotsnumber,
+            ydatas,
+            xdata,
             title,
             subtitles,
-            xdata,
-            ydatas,
             xtitles,
             xunits,
             ytitles,
@@ -340,48 +345,46 @@ def render_multiple_time_series_plot(
     if "html" in outputext:
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
-            plotsnumber,
-            title,
-            subtitles,
-            xdata,
             ydatas,
-            xtitles,
-            xunits,
-            ytitles,
-            yunits,
-            xrange,
-            yrange,
-            outpath,
-            ["html"],
-            minx,
-            figsize,
-            bins,
-            switchtobarchart,
-            tags,
-            tagstype,
+            xdata,
+            title=title,
+            subtitles=subtitles,
+            xtitles=xtitles,
+            xunits=xunits,
+            ytitles=ytitles,
+            yunits=yunits,
+            x_range=x_range,
+            y_range=y_range,
+            outpath=outpath,
+            outputext=["html"],
+            trimxvaluesoffset=minx,
+            figsize=figsize,
+            bins=bins,
+            plottype=plottype,
+            tags=tags,
+            tagstype=tagstype,
             setgradientcolors=True
         )
     if backend == "bokeh":
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
-            plotsnumber,
-            title,
-            subtitles,
-            xdata,
             ydatas,
-            xtitles,
-            xunits,
-            ytitles,
-            yunits,
-            xrange,
-            yrange,
-            outpath,
-            outputext,
-            minx,
-            figsize,
-            bins,
-            switchtobarchart,
-            tags,
-            tagstype,
+            xdata,
+            title=title,
+            subtitles=subtitles,
+            xtitles=xtitles,
+            xunits=xunits,
+            ytitles=ytitles,
+            yunits=yunits,
+            x_range=x_range,
+            y_range=y_range,
+            outpath=outpath,
+            outputext=outputext,
+            trimxvaluesoffset=minx,
+            figsize=figsize,
+            bins=bins,
+            plottype=plottype,
+            tags=tags,
+            tagstype=tagstype,
             setgradientcolors=True
         )
