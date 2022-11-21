@@ -276,7 +276,7 @@ def time_series_plot(
                         yrange=y_range)
 
     if title:
-        plot.title.text_font_size = 'large'
+        plot.title.text_font_size = '18pt'
     if xtitle:
         plot.xaxis.axis_label_text_font_size = '14pt'
     if ytitle:
