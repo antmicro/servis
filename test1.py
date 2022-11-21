@@ -16,9 +16,9 @@ for tag in data["tags"]:
     })
 
 render_time_series_plot_with_histogram(
-    "Example plot",
-    xdata,
     ydata,
+    xdata,
+    "Example plot",
     "X axis",
     "unit",
     "Y axis",
