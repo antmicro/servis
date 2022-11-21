@@ -176,21 +176,21 @@ def add_tags(
 
 
 def time_series_plot(
-        title: str,
-        xdata: List,
         ydata: List,
-        xtitle: str,
-        xunit: str,
-        ytitle: str,
-        yunit: str,
-        xrange: Optional[Tuple] = None,
-        yrange: Optional[Tuple] = None,
+        xdata: List,
+        title: Optional[str],
+        xtitle: Optional[str],
+        xunit: Optional[str],
+        ytitle: Optional[str],
+        yunit: Optional[str],
+        x_range: Optional[Tuple] = None,
+        y_range: Optional[Tuple] = None,
         trimxvaluesoffset: float = 0.0,
         figsize: Tuple = (1500, 850),
         tags: List = [],
         tagstype: str = 'single',
         setgradientcolors: bool = False,
-        switchtobarchart: bool = False):
+        plottype: str = 'scatter'):
     """
     Returns time series plot.
 
@@ -198,23 +198,23 @@ def time_series_plot(
 
     Parameters
     ----------
-    title : str
-        Title of the plot
-    xdata : List
-        The values for X dimension
     ydata : List
         The values for Y dimension
-    xtitle : str
+    xdata : List
+        The values for X dimension
+    title : Optional[str]
+        Title of the plot
+    xtitle : Optional[str]
         Name of the X axis
-    xuint : str
+    xuint : Optional[str]
         Unit for the X axis
-    ytitle : str
+    ytitle : Optional[str]
         Name of the Y axis
-    yunit : str
+    yunit : Optional[str]
         Unit for the Y axis
-    xrange : Optional[Tuple]
+    x_range : Optional[Tuple]
         The range of zoom on X axis
-    yrange : Optional[Tuple]
+    y_range : Optional[Tuple]
         The range of zoom on Y axis
     trimxvaluesoffset: float
         The number by which the values will be trimmed
@@ -229,21 +229,26 @@ def time_series_plot(
     setgradientcolors:
         True if gradient colors from turquoise to raspberry red
         instead of one color should be set. False otherwise.
-    switchtobarchart:
-        True if you want to change the plot type to barchart
+    plottype: str
+        Can be 'scatter' or 'bar'
 
     Returns
     -------
     plot: bkfigure
         Returns time series plot
     """
+    assert plottype in ['scatter', 'bar']
+    xlabel = None
+    if xtitle:
+        xlabel = xtitle
+        if xunit is not None:
+            xlabel += f' [{xunit}]'
 
-    xlabel = xtitle
-    if xunit is not None:
-        xlabel += f' [{xunit}]'
-    ylabel = ytitle
-    if yunit is not None:
-        ylabel += f' [{yunit}]'
+    ylabel = None
+    if ytitle:
+        ylabel = ytitle
+        if yunit is not None:
+            ylabel += f' [{yunit}]'
 
     plot = bkfigure(width=int(figsize[0]),
                     height=figsize[1],
@@ -255,10 +260,10 @@ def time_series_plot(
                     toolbar_location=None,
                     output_backend='webgl')
 
-    if xrange is not None:
-        plot.x_range = Range1d(xrange[0], xrange[1])
-    if yrange is not None:
-        plot.y_range = Range1d(yrange[0], yrange[1])
+    if x_range is not None:
+        plot.x_range = Range1d(x_range[0], x_range[1])
+    if y_range is not None:
+        plot.y_range = Range1d(y_range[0], y_range[1])
 
     # adding tagging visualizations to the plot
     if len(tags) > 0:
@@ -268,24 +273,27 @@ def time_series_plot(
                         trimxvaluesoffset=-trimxvaluesoffset,
                         max_y_value=max(ydata),
                         min_y_value=min(ydata),
-                        yrange=yrange)
+                        yrange=y_range)
 
-    plot.title.text_font_size = 'large'
-    plot.xaxis.axis_label_text_font_size = '14pt'
-    plot.yaxis.axis_label_text_font_size = '14pt'
+    if title:
+        plot.title.text_font_size = 'large'
+    if xtitle:
+        plot.xaxis.axis_label_text_font_size = '14pt'
+    if ytitle:
+        plot.yaxis.axis_label_text_font_size = '14pt'
 
     data_colors = "navy"
     if setgradientcolors is True:
         data_colors = get_colors(ydata[0:-1])
 
-    if switchtobarchart is True:
+    if plottype == 'bar':
         plot.quad(top=ydata[:-1],
                   bottom=0,
                   left=xdata[:-1],
                   right=xdata[1:],
                   fill_color=data_colors,
                   line_color=data_colors)
-    else:
+    elif plottype == 'scatter':
         plot.scatter(x=xdata, y=ydata, size=10, color=data_colors)
 
     return plot
@@ -348,23 +356,22 @@ def value_histogram(
 
 
 def create_bokeh_plot(
-        plotsnumber: int,
-        title: str,
-        subtitles: List[str],
+        ydatas: List[List],
         xdata: List,
-        ydatas: List,
-        xtitles: List[str],
-        xunits: List[str],
-        ytitles: List[str],
-        yunits: List[str],
-        xrange: Optional[Tuple] = None,
-        yrange: Optional[Tuple] = None,
+        title: Optional[str],
+        subtitles: Optional[List[str]],
+        xtitles: Optional[List[str]],
+        xunits: Optional[List[str]],
+        ytitles: Optional[List[str]],
+        yunits: Optional[List[str]],
+        x_range: Optional[Tuple] = None,
+        y_range: Optional[Tuple] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
         trimxvaluesoffset: float = 0.0,
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
-        switchtobarchart: bool = True,
+        plottype: str = 'scatter',
         tags: List[Dict] = [],
         tagstype: str = "single",
         setgradientcolors: bool = False):
@@ -373,8 +380,26 @@ def create_bokeh_plot(
 
     Parameters
     ----------
-    plotsnumber: int
-        Number of time series plots in the figure.
+    ydatas : List
+        The values for Y dimension
+    xdata : List
+        The values for X dimension
+    title : Optional[List[str]]
+        Title of the plot
+    subtitles : Optional[List[str]]
+        Titles of the subplots
+    xtitles : Optional[List[str]]
+        Name of the X axis
+    xuints : Optional[List[str]]
+        Unit for the X axis
+    ytitles : Optional[List[str]]
+        Name of the Y axis
+    yunits : Optional[List[str]]
+        Unit for the Y axis
+    x_range : Optional[Tuple]
+        The range of zoom on X axis
+    y_range : Optional[Tuple]
+        The range of zoom on Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
     outputext: List[str]
@@ -383,34 +408,14 @@ def create_bokeh_plot(
         "png" for PNG file,
         "svg" for SVG file,
         "txt" for TXT file
-    title : List[str]
-        Title of the plot
-    subtitles : List[str]
-        Titles of the subplots
-    xdata : List
-        The values for X dimension
-    ydatas : List
-        The values for Y dimension
-    xtitles : List[str]
-        Name of the X axis
-    xuints : List[str]
-        Unit for the X axis
-    ytitles : List[str]
-        Name of the Y axis
-    yunits : List[str]
-        Unit for the Y axis
-    xrange : Optional[Tuple]
-        The range of zoom on X axis
-    yrange : Optional[Tuple]
-        The range of zoom on Y axis
     trimxvaluesoffset: float
         The number by which the tags timestamps values will be trimmed
     figsize: Tuple
         The size of the figure
     bins: int
         Number of bins for value histograms
-    switchtobarchart:
-        True if you want to change the plot type to barchart
+    plottype: str
+        Can be 'scatter' or 'bar'
     tags: list
         List of tags and their timestamps
     tagstype: str
@@ -422,24 +427,35 @@ def create_bokeh_plot(
     ts_plots = []
     val_histograms = []
 
+    plotsnumber = len(ydatas)
+
+    if xtitles is None:
+        xtitles = [None for _ in range(plotsnumber)]
+    if xunits is None:
+        xunits = [None for _ in range(plotsnumber)]
+    if ytitles is None:
+        ytitles = [None for _ in range(plotsnumber)]
+    if yunits is None:
+        yunits = [None for _ in range(plotsnumber)]
+
     for subtitle, xtitle, xunit, ytitle, yunit, ydata in zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):  # noqa: E501
         ts_plots.append(time_series_plot(
-            subtitle,
-            xdata,
             ydata,
+            xdata,
+            subtitle,
             xtitle,
             xunit,
             ytitle,
             yunit,
-            xrange,
-            yrange,
+            x_range,
+            y_range,
             trimxvaluesoffset=trimxvaluesoffset,
             # plots should be in a ratio of 8:3
             figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
-            setgradientcolors=setgradientcolors,
-            switchtobarchart=switchtobarchart,
             tags=tags,
-            tagstype=tagstype
+            tagstype=tagstype,
+            setgradientcolors=setgradientcolors,
+            plottype=plottype
         ))
 
         val_histograms.append(value_histogram(
@@ -451,7 +467,7 @@ def create_bokeh_plot(
             setgradientcolors=setgradientcolors
         ))
 
-    if(title != ""):
+    if title:
         div = Div(text=title)
         plots = [[div]]
     else:
