@@ -1,5 +1,7 @@
 # Servis
 
+Copyright (c) 2022 [Antmicro](https://www.antmicro.com)
+
 A repository for rendering time series plots in various formats.
 
 Examples of projects using the module:
