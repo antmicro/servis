@@ -2,7 +2,6 @@
 
 import argparse
 import sys
-import numpy as np
 from servis import render_time_series_plot_with_histogram
 
 
@@ -21,19 +20,12 @@ def main():
         y = int(line.split(" ")[0])
         y_values.append(y)
 
-    y_values = np.array(y_values)
-
     if len(x_values) == 0:
-        x_values = np.arange(len(y_values))
+        x_values = [i for i in range(len(y_values))]
 
     render_time_series_plot_with_histogram(
-        "",
-        x_values,
         y_values,
-        None,
-        None,
-        None,
-        None
+        x_values,
     )
 
 
