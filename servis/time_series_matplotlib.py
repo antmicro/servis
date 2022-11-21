@@ -3,15 +3,14 @@ from pathlib import Path
 
 
 def create_multiple_matplotlib_plot(
-        plotsnumber: int,
-        title: str,
-        subtitles: Optional[List[str]],
+        ydatas: List[List],
         xdata: List,
-        ydatas: List,
-        xtitles: List[str],
-        xunits: List[str],
-        ytitles: List[str],
-        yunits: List[str],
+        title: Optional[str] = None,
+        subtitles: Optional[List[str]] = None,
+        xtitles: Optional[List[str]] = None,
+        xunits: Optional[List[str]] = None,
+        ytitles: Optional[List[str]] = None,
+        yunits: Optional[List[str]] = None,
         outpath: Optional[Path] = None,
         figsize: Tuple = (1500, 1080),
         bins: int = 20):
@@ -23,32 +22,32 @@ def create_multiple_matplotlib_plot(
 
     Parameters
     ----------
-    plotsnumber: int
-        Number of time series plots in the figure.
-        Title of the plot
-    subtitles : List[str]
-        Titles of the subplots
+    ydatas : List[List]
+        The list of lists of OY values for multiple series.
     xdata : List
         The values for X dimension
-    ydatas : List
-        The values for Y dimension
-    xtitles : List[str]
+    title : Optional[str]
+        Title of the plot
+    subtitles : Optional[List[str]]
+        Titles of the subplots
+    xtitles : Optional[List[str]]
         Name of the X axis
-    xuints : List[str]
+    xuints : Optional[List[str]]
         Unit for the X axis
-    ytitles : List[str]
+    ytitles : Optional[List[str]]
         Name of the Y axis
-    yunits : List[str]
+    yunits : Optional[List[str]]
         Unit for the Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
-    title : List[str]
     figsize: Tuple
         The size of the figure
     bins: int
         Number of bins for value histograms
     """
     from matplotlib import pyplot as plt
+
+    plotsnumber = len(ydatas)
 
     fig, axs = plt.subplots(
         ncols=2,
@@ -71,20 +70,25 @@ def create_multiple_matplotlib_plot(
         for subtitle in subtitles:
             axplot.set_title(subtitle)
 
-    xlabels = xtitles
-    for xunit, xlabel in zip(xunits, xlabels):
-        if xunits is not None:
-            xlabel += f' [{xunit}]'
+    xlabels = None
+    if xtitles:
+        xlabels = xtitles
+        for xunit, xlabel in zip(xunits, xlabels):
+            if xunits is not None:
+                xlabel += f' [{xunit}]'
 
-    ylabels = ytitles
-    for yunit, ylabel in zip(yunits, ylabels):
-        if yunits is not None:
-            ylabel += f' [{yunit}]'
+    ylabels = None
+    if ytitles:
+        ylabels = ytitles
+        for yunit, ylabel in zip(yunits, ylabels):
+            if yunits is not None:
+                ylabel += f' [{yunit}]'
 
     if plotsnumber == 1:
-        axplot.set_xlabel(xlabel, fontsize='large')
-        axplot.set_ylabel(ylabel, fontsize='large')
-        axplot.grid()
+        if xlabels:
+            axplot.set_xlabel(xlabel[0], fontsize='large')
+            axplot.set_ylabel(ylabel[0], fontsize='large')
+            axplot.grid()
 
         axhist = axs[1]
         axhist.hist(ydatas[0], bins=bins,
@@ -94,9 +98,14 @@ def create_multiple_matplotlib_plot(
         axhist.grid(which='both')
         plt.setp(axhist.get_yticklabels(), visible=False)
     else:
-        for xlabel, ylabel, axplot in zip(xlabels, ylabels, axs[:, 0]):
-            axplot.set_xlabel(xlabel, fontsize='large')
-            axplot.set_ylabel(ylabel, fontsize='large')
+        if xlabels:
+            for xlabel, axplot in zip(xlabels, axs[:, 0]):
+                axplot.set_xlabel(xlabel, fontsize='large')
+        if ylabels:
+            for ylabel, axplot in zip(ylabels, axs[:, 0]):
+                axplot.set_ylabel(ylabel, fontsize='large')
+
+        for axplot in axs[:, 0]:
             axplot.grid()
 
         for ydata, axhist in zip(ydatas, axs[:, 1]):
@@ -114,9 +123,9 @@ def create_multiple_matplotlib_plot(
 
 
 def create_matplotlib_plot(
-        title: str,
-        xdata: List,
         ydata: List,
+        xdata: List,
+        title: str,
         xtitle: str,
         xunit: str,
         ytitle: str,
@@ -132,12 +141,12 @@ def create_matplotlib_plot(
 
     Parameters
     ----------
-    title : str
-        Title of the plot
-    xdata : List
-        The values for X dimension
     ydata : List
         The values for Y dimension
+    xdata : List
+        The values for X dimension
+    title : str
+        Title of the plot
     xtitle : str
         Name of the X axis
     xuint : str
@@ -155,11 +164,10 @@ def create_matplotlib_plot(
     """
 
     create_multiple_matplotlib_plot(
-        1,
+        [ydata],
+        xdata,
         title,
         None,
-        xdata,
-        [ydata],
         [xtitle],
         [xunit],
         [ytitle],
