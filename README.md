@@ -9,16 +9,41 @@ Examples of projects using the module:
 
 ## Requirements
 
-The module requires:
+The module supports following backends:
 
-* [NumPy](https://numpy.org/),
-* [plotext](https://github.com/piccolomo/plotext),
-* [Bokeh](https://bokeh.org/)
+* [plotext](https://github.com/piccolomo/plotext):
 
-Optional dependencies for exporting png/svg plots using Bokeh:
+    * requires plotext module only,
+    * renders plots to the terminal, in txt format
+* [bokeh](https://bokeh.org/):
 
-* [Selenium](https://www.selenium.dev/),
-* [geckodriver](https://github.com/mozilla/geckodriver).
+    * requires `bokeh` and `numpy` for HTML rendering,
+    * renders images in interactive HTML, PNG and SVG formats,
+    * optionally requires [Selenium](https://www.selenium.dev/) and [geckodriver](https://github.com/mozilla/geckodriver) for rendering PNG/SVG plots.
+* [matplotlib](https://matplotlib.org/):
+
+    * requires `matplotlib` module,
+    * renders plots in SVG/JPG/PNG format.
+
+## Installation
+
+To install base `servis` with `plotext` backend support, run:
+
+```bash
+pip install git+https://github.com/antmicro/servis
+```
+
+To install additional backends (`bokeh`, `matplotlib`) one can run:
+
+```bash
+pip install git+https://github.com/antmicro/servis#egg=servis[<backend-name>]
+```
+
+For example:
+
+```bash
+pip install git+https://github.com/antmicro/servis#egg=servis[bokeh]
+```
 
 ## Examples of running Servis
 
