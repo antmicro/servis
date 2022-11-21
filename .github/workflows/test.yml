@@ -1,0 +1,25 @@
+name: Sample tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  sample-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.8
+      - name: Install dependencies
+        run: pip install -e .[bokeh,matplotlib]
+      - name: Run test1.py
+        run: python test1.py
+      - name: Run test2.py
+        run: python test2.py
+
