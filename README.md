@@ -22,6 +22,41 @@ Optional dependencies for exporting png/svg plots using Bokeh:
 
 ## Examples of running Servis
 
+### Rendering TXT plots from standard input
+
+Servis can be run from terminal using:
+
+```
+python -m servis -h
+```
+
+It can accept a file with space-separated values, representing Y (and optionally X) values.
+It can also accept data from standard input.
+
+For example, let's create a file `sample.txt`:
+
+```
+1 0
+2 1
+4 2
+8 3
+16 4
+```
+
+The data can be provided two ways:
+
+```
+cat sample.txt | python -m servis
+```
+
+or:
+
+```
+python -m servis sample.txt
+```
+
+It is possible to control the delimiter and plot type - check help (`python -m servis -h`) for details.
+
 ### Rendering single plot in all possible extensions
 
 example script:
@@ -45,9 +80,9 @@ for tag in data["tags"]:
     })
 
 render_time_series_plot_with_histogram(
-    "Example plot",
-    xdata,
     ydata,
+    xdata,
+    "Example plot",
     "X axis",
     "unit",
     "Y axis",
@@ -95,16 +130,15 @@ for tag in data["tags"]:
     })
 
 render_multiple_time_series_plot(
-    2,
-    "Example plot",
-    ["Plot1", "Plot2"],
-    xdata,
     [ydata1, ydata2],
-    ["X axis"]*2,
-    ["unit"]*2,
-    ["Y axis"]*2,
-    ["unit"]*2,
-    yrange=(-5, 105),
+    xdata,
+    title="Example plot",
+    subtitles=["Plot1", "Plot2"],
+    xtitles=["X axis"]*2,
+    xunits=["unit"]*2,
+    ytitles=["Y axis"]*2,
+    yunits=["unit"]*2,
+    y_range=(-5, 105),
     outpath="example_plots/multipleplot",
     outputext=["png", "html"],
     tags=tags,
