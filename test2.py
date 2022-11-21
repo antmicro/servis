@@ -29,5 +29,6 @@ render_multiple_time_series_plot(
     outputext=["png", "html"],
     tags=tags,
     tagstype="single",
-    backend="matplotlib"
+    backend="matplotlib",
+    is_x_timestamp=False
 )
