@@ -79,7 +79,7 @@ def create_ascii_plot(
     elif plottype == 'scatter':
         plotext.scatter(xdata, ydata)
     elif plottype == 'line':
-        plotext.line(xdata, ydata)
+        plotext.plot(xdata, ydata)
 
     if figsize is not None:
         plotext.limit_size(False)
