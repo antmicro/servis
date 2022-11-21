@@ -18,15 +18,15 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'plotext>=5.0.2'
+        'plotext==5.0.2'
     ],
-    extra_require={
+    extras_require={
         'bokeh': [
-            'numpy>=1.23.4',
-            'bokeh>=2.4.3'
+            'numpy==1.23.4',
+            'bokeh==2.4.3'
         ],
         'matplotlib': [
-            'matplotlib>=3.6.1'
+            'matplotlib==3.6.1'
         ]
     },
     entry_points={
