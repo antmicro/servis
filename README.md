@@ -2,9 +2,9 @@
 
 Copyright (c) 2022 [Antmicro](https://www.antmicro.com)
 
-A repository for rendering time series plots in various formats.
+A tool for rendering time series plots in multiple formats.
 
-Examples of projects using the module:
+Example projects using the module:
 
 * [Kenning](https://github.com/antmicro/kenning)
 * [Sargraph](https://github.com/antmicro/sargraph)
@@ -16,7 +16,7 @@ The module supports following backends:
 * [plotext](https://github.com/piccolomo/plotext):
 
     * requires plotext module only,
-    * renders plots to the terminal, in txt format
+    * renders plots to terminal, in txt format
 * [bokeh](https://bokeh.org/):
 
     * requires `bokeh` and `numpy` for HTML rendering,
@@ -35,7 +35,7 @@ To install base `servis` with `plotext` backend support, run:
 pip install git+https://github.com/antmicro/servis
 ```
 
-To install additional backends (`bokeh`, `matplotlib`) one can run:
+To install additional backends (`bokeh`, `matplotlib`), run:
 
 ```bash
 pip install git+https://github.com/antmicro/servis#egg=servis[<backend-name>]
@@ -47,20 +47,20 @@ For example:
 pip install git+https://github.com/antmicro/servis#egg=servis[bokeh]
 ```
 
-## Examples of running Servis
+## Servis use examples
 
 ### Rendering TXT plots from standard input
 
-Servis can be run from terminal using:
+To run Servis from terminal, use:
 
 ```
 python -m servis -h
 ```
 
-It can accept a file with space-separated values, representing Y (and optionally X) values.
-It can also accept data from standard input.
+The tool accepts files with space-separated values, representing Y (and optionally X) values.
+It also accepts data from standard input.
 
-For example, let's create a file `sample.txt`:
+For example, we can create a `sample.txt` file:
 
 ```
 1 0
@@ -70,7 +70,7 @@ For example, let's create a file `sample.txt`:
 16 4
 ```
 
-The data can be provided two ways:
+We can provide data in two ways:
 
 ```
 cat sample.txt | python -m servis
@@ -84,9 +84,9 @@ python -m servis sample.txt
 
 It is possible to control the delimiter and plot type - check help (`python -m servis -h`) for details.
 
-### Rendering single plot in all possible extensions
+### Rendering a single plot in all supported extensions
 
-example script:
+Example script:
 
 ```python
 import json
@@ -122,7 +122,7 @@ render_time_series_plot_with_histogram(
 )
 ```
 
-running script from terminal:
+To run the script from terminal:
 
 
 ```bash
@@ -134,9 +134,9 @@ Generated plot with PNG extension:
 ![inference plot](example_plots/singleplot.png)
 
 
-### Rendering double plot:
+### Rendering a double plot:
 
-example script:
+Example script:
 
 ```python
 import json
@@ -174,7 +174,7 @@ render_multiple_time_series_plot(
 )
 ```
 
-running script from terminal:
+To run the script from terminal:
 
 
 ```bash
