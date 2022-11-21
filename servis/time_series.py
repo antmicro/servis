@@ -112,7 +112,8 @@ def render_time_series_plot_with_histogram(
             yunit=yunit,
             x_range=x_range,
             y_range=y_range,
-            is_x_timestamp=is_x_timestamp
+            is_x_timestamp=is_x_timestamp,
+            plottype=plottype
         )
 
     if "png" in outputext and backend == "matplotlib":
@@ -161,7 +162,7 @@ def render_time_series_plot_with_histogram(
             outpath=outpath,
             outputext=["html"],
             trimxvaluesoffset=minx,
-            plottype='scatter',
+            plottype=plottype,
             figsize=figsize,
             bins=bins,
             tags=tags,
@@ -184,7 +185,7 @@ def render_time_series_plot_with_histogram(
             outpath=outpath,
             outputext=outputext,
             trimxvaluesoffset=minx,
-            plottype='scatter',
+            plottype=plottype,
             figsize=figsize,
             bins=bins,
             tags=tags,
