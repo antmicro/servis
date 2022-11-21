@@ -1,0 +1,17 @@
+image: $CI_IMAGE
+
+variables:
+    GIT_STRATEGY: clone
+    GIT_SUBMODULE_STRATEGY: recursive
+
+flake8:
+    script:
+        - flake8 .
+    allow_failure: false
+
+test:
+    script:
+        - pip3 install -e .[bokeh,matplotlib]
+        - python3 test1.py
+        - python3 test2.py
+    allow_failure: false
