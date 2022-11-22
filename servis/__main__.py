@@ -35,9 +35,9 @@ def main():
         if line == '\n':
             continue
         split = line.split(args.delimiter)
-        y_values.append(int(split[0]))
+        y_values.append(float(split[0]))
         if len(split) == 2:
-            x_values.append(int(split[1]))
+            x_values.append(float(split[1]))
 
     if len(x_values) == 0:
         x_values = [i for i in range(len(y_values))]
