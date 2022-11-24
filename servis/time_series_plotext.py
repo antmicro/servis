@@ -17,7 +17,8 @@ def create_ascii_plot(
         is_x_timestamp: bool = True,
         canvas_color='black',
         axes_color='black',
-        ticks_color='white'):
+        ticks_color='white',
+        color='white'):
     """
     Draws ASCII time series plot in terminal.
 
@@ -75,9 +76,9 @@ def create_ascii_plot(
         ylabel += f' [{yunit}]'
 
     if plottype == 'bar':
-        plotext.bar(xdata, ydata, width=0.1)
+        plotext.bar(xdata, ydata, width=0.1, color=(231, 74, 60))
     elif plottype == 'scatter':
-        plotext.scatter(xdata, ydata)
+        plotext.scatter(xdata, ydata, color=(231, 74, 60))
     elif plottype == 'line':
         plotext.plot(xdata, ydata)
 

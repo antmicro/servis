@@ -29,26 +29,29 @@ def get_colors(data: List):
     data_colors: List
         List of colors for values given in input.
     """
-    colors = ["#53FFD1",
-              "#5CF3CB",
-              "#65E8C5",
-              "#6EDCBF",
-              "#77D1B9",
-              "#80C5B2",
-              "#89BAAC",
-              "#92AEA6",
-              "#9BA2A0",
-              "#A4979A",
-              "#AE8B94",
-              "#B7808E",
-              "#C07488",
-              "#C96882",
-              "#D25D7C",
-              "#DB5175",
-              "#E4466F",
-              "#ED3A69",
-              "#F62F63",
-              "#FF235D"]
+    colors = [
+        "#c0e4eb",
+        "#c2dfe5",
+        "#c4d9df",
+        "#c7d3d9",
+        "#c9cdd3",
+        "#cbc7cc",
+        "#cdc1c5",
+        "#cfbbbe",
+        "#d1b4b7",
+        "#d3adaf",
+        "#d5a6a7",
+        "#d79e9f",
+        "#d99696",
+        "#db8e8d",
+        "#dd8583",
+        "#df7c78",
+        "#e1716c",
+        "#e3665f",
+        "#e5594f",
+        "#e74a3c"
+    ]
+
     data_colors = []
     for d in data:
         # there are 20 colors and the values are between 0 and 100,
@@ -103,7 +106,7 @@ def add_tags(
             span = Span(location=t["timestamp"],
                         line_dash='dashed',
                         dimension='height',
-                        line_color='thistle',
+                        line_color='#424B54',
                         line_width=2)
             plot.add_layout(span)
 
