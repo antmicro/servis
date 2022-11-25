@@ -1,7 +1,6 @@
 from typing import List, Dict, Tuple, Optional
 from bokeh.plotting import output_file, show, save, figure as bkfigure
 from bokeh.models import Range1d, ColumnDataSource, Span, LabelSet, Div
-from bokeh.palettes import d3 as palette
 from numpy import histogram, float_
 from bokeh.io import export_png, export_svg
 from pathlib import Path
@@ -146,8 +145,12 @@ def add_tags(
             if d['name'] not in tags_names:
                 tags_names.append(d['name'])
 
-        # 3 is minimum number of colors in the palette
-        colors = palette['Category10'][max(3, len(tags_names))]
+        palette = ["#A5D5C8",
+                   "#98969A",
+                   "#E2F1F4",
+                   "#F2BAA6"]
+
+        colors = palette[0:len(tags_names)]
         tags_colors = dict()
 
         for id, name in enumerate(tags_names):
@@ -174,6 +177,8 @@ def add_tags(
         plot.legend.location = "top_left"
         plot.legend.click_policy = "mute"
         plot.legend.location = "top_left"
+        plot.legend.title_text_font = "helvetica"
+        plot.legend.label_text_font = "helvetica"
 
     return plot
 
@@ -224,11 +229,11 @@ def time_series_plot(
     figsize: Tuple
         The size of the figure
     tags: list
-        List of tags and their timestamps
+        List of tags and their helveticatamps
     tagstype: str
-        "single" if given list contain tags with only one timestamp
+        "single" if given list contain tags with only one helveticatamp
         "double" if given list contain tags with two (start and end)
-        timestamps.
+        helveticatamps.
     setgradientcolors:
         True if gradient colors from turquoise to raspberry red
         instead of one color should be set. False otherwise.
@@ -280,12 +285,17 @@ def time_series_plot(
 
     if title:
         plot.title.text_font_size = '18pt'
+        plot.title.text_font = 'helvetica'
     if xtitle:
         plot.xaxis.axis_label_text_font_size = '14pt'
+        plot.xaxis.axis_label_text_font_style = 'normal'
+        plot.xaxis.axis_label_text_font = 'helvetica'
     if ytitle:
         plot.yaxis.axis_label_text_font_size = '14pt'
+        plot.yaxis.axis_label_text_font_style = 'normal'
+        plot.yaxis.axis_label_text_font = 'helvetica'
 
-    data_colors = "navy"
+    data_colors = "#E74A3C"
     if setgradientcolors is True:
         data_colors = get_colors(ydata[0:-1])
 
@@ -345,10 +355,12 @@ def value_histogram(
     plot.yaxis.visible = False
     plot.x_range.start = 1
     plot.xaxis.axis_label_text_font_size = '14pt'
+    plot.xaxis.axis_label_text_font_style = 'normal'
+    plot.xaxis.axis_label_text_font = 'helvetica'
 
     hist, edges = histogram(ydata, bins=bins)
 
-    data_colors = "navy"
+    data_colors = "#E74A3C"
     if setgradientcolors is True:
         data_colors = get_colors(edges[:-1])
 

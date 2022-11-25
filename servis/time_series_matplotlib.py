@@ -61,10 +61,10 @@ def create_multiple_matplotlib_plot(
 
     if plotsnumber == 1:
         axplot = axs[0]
-        axplot.scatter(xdata, ydatas[0], c='purple', alpha=0.5)
+        axplot.scatter(xdata, ydatas[0], c='#E74A3C', alpha=0.5)
     else:
         for ydata, axplot in zip(ydatas, axs[:, 0]):
-            axplot.scatter(xdata, ydata, c='purple', alpha=0.5)
+            axplot.scatter(xdata, ydata, c='#E74A3C', alpha=0.5)
 
     if subtitles is not None:
         for subtitle in subtitles:
@@ -92,7 +92,7 @@ def create_multiple_matplotlib_plot(
 
         axhist = axs[1]
         axhist.hist(ydatas[0], bins=bins,
-                    orientation='horizontal', color='purple')
+                    orientation='horizontal', color='#E74A3C')
         axhist.set_xscale('log')
         axhist.set_xlabel('Value histogram', fontsize='large')
         axhist.grid(which='both')
@@ -110,7 +110,7 @@ def create_multiple_matplotlib_plot(
 
         for ydata, axhist in zip(ydatas, axs[:, 1]):
             axhist.hist(ydata, bins=bins,
-                        orientation='horizontal', color='purple')
+                        orientation='horizontal', color='#E74A3C')
             axhist.set_xscale('log')
             axhist.set_xlabel('Value histogram', fontsize='large')
             axhist.grid(which='both')
