@@ -1,5 +1,8 @@
 from typing import List, Tuple, Optional
 from pathlib import Path
+from matplotlib import rcParams, pyplot as plt
+
+rcParams['font.sans-serif'] = 'lato'
 
 
 def create_multiple_matplotlib_plot(
@@ -45,7 +48,6 @@ def create_multiple_matplotlib_plot(
     bins: int
         Number of bins for value histograms
     """
-    from matplotlib import pyplot as plt
 
     plotsnumber = len(ydatas)
 
