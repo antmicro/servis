@@ -177,8 +177,8 @@ def add_tags(
         plot.legend.location = "top_left"
         plot.legend.click_policy = "mute"
         plot.legend.location = "top_left"
-        plot.legend.title_text_font = "helvetica"
-        plot.legend.label_text_font = "helvetica"
+        plot.legend.title_text_font = "lato"
+        plot.legend.label_text_font = "lato"
 
     return plot
 
@@ -285,15 +285,15 @@ def time_series_plot(
 
     if title:
         plot.title.text_font_size = '18pt'
-        plot.title.text_font = 'helvetica'
+        plot.title.text_font = 'lato'
     if xtitle:
         plot.xaxis.axis_label_text_font_size = '14pt'
         plot.xaxis.axis_label_text_font_style = 'normal'
-        plot.xaxis.axis_label_text_font = 'helvetica'
+        plot.xaxis.axis_label_text_font = 'lato'
     if ytitle:
         plot.yaxis.axis_label_text_font_size = '14pt'
         plot.yaxis.axis_label_text_font_style = 'normal'
-        plot.yaxis.axis_label_text_font = 'helvetica'
+        plot.yaxis.axis_label_text_font = 'lato'
 
     data_colors = "#E74A3C"
     if setgradientcolors is True:
@@ -356,7 +356,7 @@ def value_histogram(
     plot.x_range.start = 1
     plot.xaxis.axis_label_text_font_size = '14pt'
     plot.xaxis.axis_label_text_font_style = 'normal'
-    plot.xaxis.axis_label_text_font = 'helvetica'
+    plot.xaxis.axis_label_text_font = 'lato'
 
     hist, edges = histogram(ydata, bins=bins)
 
