@@ -26,7 +26,8 @@ def render_time_series_plot_with_histogram(
         plottype: str = 'bar',
         tags: List = [],
         tagstype: str = "single",
-        backend: str = "plotext"):
+        backend: str = "plotext",
+        setgradientcolors: bool = False):
     """
     Draws time series plot.
 
@@ -86,6 +87,10 @@ def render_time_series_plot_with_histogram(
     backend: str
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
+    setgradientcolors:
+        True if gradient colors instead of one color should be set
+        in plot rendered using Bokeh.
+        False otherwise.
     """
     assert backend in ['bokeh', 'matplotlib', 'plotext']
 
@@ -189,7 +194,8 @@ def render_time_series_plot_with_histogram(
             figsize=figsize,
             bins=bins,
             tags=tags,
-            tagstype=tagstype
+            tagstype=tagstype,
+            setgradientcolors=setgradientcolors
         )
 
 
@@ -214,7 +220,8 @@ def render_multiple_time_series_plot(
         plottype: str = 'bar',
         tags: List[Dict] = [],
         tagstype: str = "single",
-        backend: str = "plotext"):
+        backend: str = "plotext",
+        setgradientcolors: bool = False):
     """
     Draws multiple time series plot.
 
@@ -277,6 +284,10 @@ def render_multiple_time_series_plot(
     backend: str
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
+    setgradientcolors:
+        True if gradient colors instead of one color should be set
+        in plot rendered using Bokeh.
+        False otherwise.
     """
     assert backend in ['bokeh', 'matplotlib', 'plotext']
 
@@ -364,7 +375,7 @@ def render_multiple_time_series_plot(
             plottype=plottype,
             tags=tags,
             tagstype=tagstype,
-            setgradientcolors=True
+            setgradientcolors=setgradientcolors
         )
     if backend == "bokeh":
         from servis.time_series_bokeh import create_bokeh_plot
@@ -387,5 +398,5 @@ def render_multiple_time_series_plot(
             plottype=plottype,
             tags=tags,
             tagstype=tagstype,
-            setgradientcolors=True
+            setgradientcolors=setgradientcolors
         )

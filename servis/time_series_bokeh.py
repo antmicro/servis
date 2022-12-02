@@ -5,6 +5,7 @@ from numpy import histogram, float_
 from bokeh.io import export_png, export_svg
 from pathlib import Path
 from bokeh.layouts import gridplot
+import re
 
 
 def get_colors(data: List):
@@ -98,7 +99,7 @@ def add_tags(
         trimmed_tagstimestamps = list()
         for t in tags:
             trimmed_tagstimestamps.append({'name': t['name'],
-                                        'timestamp': t['timestamp']+trimxvaluesoffset})  # noqa: 501
+                                           'timestamp': t['timestamp']+trimxvaluesoffset})  # noqa: E501
         tags = trimmed_tagstimestamps
 
         for t in tags:
@@ -135,8 +136,8 @@ def add_tags(
         trimmed_tagstimestamps = list()
         for t in tags:
             trimmed_tagstimestamps.append({'name': t['name'],
-                                           'start': t['start']+trimxvaluesoffset,  # noqa: 501
-                                           'end': t['end']+trimxvaluesoffset})  # noqa: 501
+                                           'start': t['start']+trimxvaluesoffset,  # noqa: E501
+                                           'end': t['end']+trimxvaluesoffset})  # noqa: E501
             tags = trimmed_tagstimestamps
 
         tags_names = list()
@@ -145,10 +146,10 @@ def add_tags(
             if d['name'] not in tags_names:
                 tags_names.append(d['name'])
 
-        palette = ["#A5D5C8",
-                   "#98969A",
-                   "#E2F1F4",
-                   "#F2BAA6"]
+        palette = ["#01B47E",
+                   "#332D37",
+                   "#4088F4",
+                   "#F15F32"]
 
         colors = palette[0:len(tags_names)]
         tags_colors = dict()
@@ -177,8 +178,8 @@ def add_tags(
         plot.legend.location = "top_left"
         plot.legend.click_policy = "mute"
         plot.legend.location = "top_left"
-        plot.legend.title_text_font = "lato"
-        plot.legend.label_text_font = "lato"
+        plot.legend.title_text_font = "Lato"
+        plot.legend.label_text_font = "Lato"
 
     return plot
 
@@ -235,8 +236,8 @@ def time_series_plot(
         "double" if given list contain tags with two (start and end)
         helveticatamps.
     setgradientcolors:
-        True if gradient colors from turquoise to raspberry red
-        instead of one color should be set. False otherwise.
+        True if gradient colors instead of one color should be set.
+        False otherwise.
     plottype: str
         Can be 'scatter' or 'bar'
 
@@ -285,15 +286,15 @@ def time_series_plot(
 
     if title:
         plot.title.text_font_size = '18pt'
-        plot.title.text_font = 'lato'
+        plot.title.text_font = 'Lato'
     if xtitle:
         plot.xaxis.axis_label_text_font_size = '14pt'
         plot.xaxis.axis_label_text_font_style = 'normal'
-        plot.xaxis.axis_label_text_font = 'lato'
+        plot.xaxis.axis_label_text_font = 'Lato'
     if ytitle:
         plot.yaxis.axis_label_text_font_size = '14pt'
         plot.yaxis.axis_label_text_font_style = 'normal'
-        plot.yaxis.axis_label_text_font = 'lato'
+        plot.yaxis.axis_label_text_font = 'Lato'
 
     data_colors = "#E74A3C"
     if setgradientcolors is True:
@@ -356,7 +357,7 @@ def value_histogram(
     plot.x_range.start = 1
     plot.xaxis.axis_label_text_font_size = '14pt'
     plot.xaxis.axis_label_text_font_style = 'normal'
-    plot.xaxis.axis_label_text_font = 'lato'
+    plot.xaxis.axis_label_text_font = 'Lato'
 
     hist, edges = histogram(ydata, bins=bins)
 
@@ -368,6 +369,28 @@ def value_histogram(
               fill_color=data_colors, line_color=data_colors, alpha=1)
 
     return plot
+
+
+def add_font_to_html(filename):
+    pattern = '<head>'
+    head_location = None
+    font_line = r'    <link rel="preload" href="https://fonts.googleapis.com/css?family=Lato">'+"\n"  # noqa: E501
+    with open(filename, 'r') as file:
+        content = file.readlines()
+
+    for line in content:
+        r = re.search(pattern, line)
+        if r is not None:
+            head_location = r.span()[0]
+
+    if head_location is None:
+        raise Exception("Head not found in HTML file")
+
+    content.insert(head_location+1, font_line)
+
+    with open(filename, 'w') as file:
+        content = "".join(content)
+        file.write(content)
 
 
 def create_bokeh_plot(
@@ -483,7 +506,7 @@ def create_bokeh_plot(
         ))
 
     if title:
-        div = Div(text=title)
+        div = Div(text=f'<p style="font-family:Lato"> {title}')
         plots = [[div]]
     else:
         plots = []
@@ -496,8 +519,11 @@ def create_bokeh_plot(
         show(multiple_plot)
 
     if "html" in outputext:
-        output_file(f"{outpath}.html", title=title, mode='inline')
+        output_file_name = f"{outpath}.html"
+        output_file(output_file_name, title=title, mode='inline')
         save(multiple_plot)
+
+        add_font_to_html(output_file_name)
 
     multiple_plot = gridplot(
         plots, merge_tools=True, toolbar_location=None)
