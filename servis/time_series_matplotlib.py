@@ -7,7 +7,7 @@ rcParams['font.sans-serif'] = 'lato'
 
 def create_multiple_matplotlib_plot(
         ydatas: List[List],
-        xdata: List,
+        xdatas: List[List],
         title: Optional[str] = None,
         subtitles: Optional[List[str]] = None,
         xtitles: Optional[List[str]] = None,
@@ -63,9 +63,9 @@ def create_multiple_matplotlib_plot(
 
     if plotsnumber == 1:
         axplot = axs[0]
-        axplot.scatter(xdata, ydatas[0], c='#E74A3C', alpha=0.5)
+        axplot.scatter(xdatas[0], ydatas[0], c='#E74A3C', alpha=0.5)
     else:
-        for ydata, axplot in zip(ydatas, axs[:, 0]):
+        for ydata, xdata, axplot in zip(ydatas, xdatas, axs[:, 0]):
             axplot.scatter(xdata, ydata, c='#E74A3C', alpha=0.5)
 
     if subtitles is not None:
@@ -167,7 +167,7 @@ def create_matplotlib_plot(
 
     create_multiple_matplotlib_plot(
         [ydata],
-        xdata,
+        [xdata],
         title,
         None,
         [xtitle],
