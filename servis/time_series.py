@@ -155,7 +155,7 @@ def render_time_series_plot_with_histogram(
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
             ydatas=[ydata],
-            xdata=xdata,
+            xdatas=[xdata],
             title=title,
             subtitles=[title],
             xtitles=[xtitle],
@@ -166,7 +166,7 @@ def render_time_series_plot_with_histogram(
             y_range=y_range,
             outpath=outpath,
             outputext=["html"],
-            trimxvaluesoffset=minx,
+            trimxvaluesoffsets=[minx],
             plottype=plottype,
             figsize=figsize,
             bins=bins,
@@ -178,7 +178,7 @@ def render_time_series_plot_with_histogram(
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
             ydatas=[ydata],
-            xdata=xdata,
+            xdatas=[xdata],
             title=title,
             subtitles=[title],
             xtitles=[xtitle],
@@ -189,7 +189,7 @@ def render_time_series_plot_with_histogram(
             y_range=y_range,
             outpath=outpath,
             outputext=outputext,
-            trimxvaluesoffset=minx,
+            trimxvaluesoffsets=[minx],
             plottype=plottype,
             figsize=figsize,
             bins=bins,
@@ -201,7 +201,7 @@ def render_time_series_plot_with_histogram(
 
 def render_multiple_time_series_plot(
         ydatas: List,
-        xdata: List,
+        xdatas: List,
         title: str,
         subtitles: List[str],
         xtitles: List[str],
@@ -291,16 +291,23 @@ def render_multiple_time_series_plot(
     """
     assert backend in ['bokeh', 'matplotlib', 'plotext']
 
-    if xdata is None:
-        xdata = [i for i in range(len(ydatas[0]))]
+    if xdatas is None:
+        xdatas = [list(range(len(ydatas[0]))) for _ in range(len(ydatas))]
+
     start = 1 if skipfirst else 0
-    xdata = xdata[start:]
+
+    for xdata in xdatas:
+        xdata = xdata[start:]
+
     for ydata in ydatas:
         ydata = ydata[start:]
 
     if trimxvalues:
-        minx = min(xdata)
-        xdata = [x - minx for x in xdata]
+        offsets = []
+        for xdata in xdatas:
+            minx = min(xdata)
+            xdata = [x - minx for x in xdata]
+            offsets.append(minx)
 
     if "txt" in outputext:
         print('\n\n')
@@ -358,7 +365,7 @@ def render_multiple_time_series_plot(
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
             ydatas,
-            xdata,
+            xdatas,
             title=title,
             subtitles=subtitles,
             xtitles=xtitles,
@@ -369,7 +376,7 @@ def render_multiple_time_series_plot(
             y_range=y_range,
             outpath=outpath,
             outputext=["html"],
-            trimxvaluesoffset=minx,
+            trimxvaluesoffsets=offsets,
             figsize=figsize,
             bins=bins,
             plottype=plottype,
@@ -381,7 +388,7 @@ def render_multiple_time_series_plot(
         from servis.time_series_bokeh import create_bokeh_plot
         create_bokeh_plot(
             ydatas,
-            xdata,
+            xdatas,
             title=title,
             subtitles=subtitles,
             xtitles=xtitles,
@@ -392,7 +399,7 @@ def render_multiple_time_series_plot(
             y_range=y_range,
             outpath=outpath,
             outputext=outputext,
-            trimxvaluesoffset=minx,
+            trimxvaluesoffsets=offsets,
             figsize=figsize,
             bins=bins,
             plottype=plottype,

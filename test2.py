@@ -17,7 +17,7 @@ for tag in data["tags"]:
 
 render_multiple_time_series_plot(
     [ydata1, ydata2],
-    xdata,
+    [xdata]*2,
     title="Example plot",
     subtitles=["Plot1", "Plot2"],
     xtitles=["X axis"]*2,
@@ -30,5 +30,6 @@ render_multiple_time_series_plot(
     tags=tags,
     tagstype="single",
     backend="matplotlib",
-    is_x_timestamp=False
+    is_x_timestamp=False,
+    setgradientcolors=True
 )

@@ -407,7 +407,7 @@ def add_font_url_to_html(filename: Path):
 
 def create_bokeh_plot(
         ydatas: List[List],
-        xdata: List,
+        xdatas: List[List],
         title: Optional[str],
         subtitles: Optional[List[str]],
         xtitles: Optional[List[str]],
@@ -418,7 +418,7 @@ def create_bokeh_plot(
         y_range: Optional[Tuple] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
-        trimxvaluesoffset: float = 0.0,
+        trimxvaluesoffsets: Optional[List[float]] = None,
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
         plottype: str = 'scatter',
@@ -432,7 +432,7 @@ def create_bokeh_plot(
     ----------
     ydatas : List
         The values for Y dimension
-    xdata : List
+    xdatas : List
         The values for X dimension
     title : Optional[List[str]]
         Title of the plot
@@ -458,8 +458,9 @@ def create_bokeh_plot(
         "png" for PNG file,
         "svg" for SVG file,
         "txt" for TXT file
-    trimxvaluesoffset: float
-        The number by which the tags timestamps values will be trimmed
+    trimxvaluesoffsets: List[float]
+        The  list of offsets - numbers by which the tags timestamps values
+        will be trimmed
     figsize: Tuple
         The size of the figure
     bins: int
@@ -488,8 +489,10 @@ def create_bokeh_plot(
     if yunits is None:
         yunits = [None for _ in range(plotsnumber)]
 
-    for subtitle, xtitle, xunit, ytitle, yunit, ydata in \
-            zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):
+    for subtitle, xtitle, xunit, ytitle, yunit, xdata, ydata, \
+            trimxvaluesoffset in \
+            zip(subtitles, xtitles, xunits, ytitles, yunits, xdatas,
+                ydatas, trimxvaluesoffsets):
 
         ts_plots.append(time_series_plot(
             ydata,
