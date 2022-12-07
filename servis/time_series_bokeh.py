@@ -98,8 +98,9 @@ def add_tags(
     if tagstype == 'single':
         trimmed_tagstimestamps = list()
         for t in tags:
-            trimmed_tagstimestamps.append({'name': t['name'],
-                                           'timestamp': t['timestamp']+trimxvaluesoffset})  # noqa: E501
+            trimmed_tagstimestamps.append({
+                'name': t['name'],
+                'timestamp': t['timestamp']+trimxvaluesoffset})
         tags = trimmed_tagstimestamps
 
         for t in tags:
@@ -135,9 +136,10 @@ def add_tags(
     else:
         trimmed_tagstimestamps = list()
         for t in tags:
-            trimmed_tagstimestamps.append({'name': t['name'],
-                                           'start': t['start']+trimxvaluesoffset,  # noqa: E501
-                                           'end': t['end']+trimxvaluesoffset})  # noqa: E501
+            trimmed_tagstimestamps.append({
+                'name': t['name'],
+                'start': t['start']+trimxvaluesoffset,
+                'end': t['end']+trimxvaluesoffset})
             tags = trimmed_tagstimestamps
 
         tags_names = list()
@@ -230,11 +232,11 @@ def time_series_plot(
     figsize: Tuple
         The size of the figure
     tags: list
-        List of tags and their helveticatamps
+        List of tags and their timestamps
     tagstype: str
-        "single" if given list contain tags with only one helveticatamp
+        "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
-        helveticatamps.
+        timestamps.
     setgradientcolors:
         True if gradient colors instead of one color should be set.
         False otherwise.
@@ -371,7 +373,16 @@ def value_histogram(
     return plot
 
 
-def add_font_to_html(filename):
+def add_font_url_to_html(filename: Path):
+    """
+    Adds font url to created html file
+
+    Parameters
+    ----------
+    filename : Path
+    the path to html file to which the link will be added
+    """
+
     pattern = '<head>'
     head_location = None
     font_line = r'    <link rel="preload" href="https://fonts.googleapis.com/css?family=Lato">'+"\n"  # noqa: E501
@@ -476,7 +487,9 @@ def create_bokeh_plot(
     if yunits is None:
         yunits = [None for _ in range(plotsnumber)]
 
-    for subtitle, xtitle, xunit, ytitle, yunit, ydata in zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):  # noqa: E501
+    for subtitle, xtitle, xunit, ytitle, yunit, ydata in \
+            zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):
+
         ts_plots.append(time_series_plot(
             ydata,
             xdata,
@@ -523,7 +536,7 @@ def create_bokeh_plot(
         output_file(output_file_name, title=title, mode='inline')
         save(multiple_plot)
 
-        add_font_to_html(output_file_name)
+        add_font_url_to_html(output_file_name)
 
     multiple_plot = gridplot(
         plots, merge_tools=True, toolbar_location=None)
