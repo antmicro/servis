@@ -27,7 +27,7 @@ render_multiple_time_series_plot(
     y_range=(-5, 105),
     outpath="example_plots/multipleplot",
     outputext=["png", "html"],
-    tags=tags,
+    tags=[tags]*2,
     tagstype="single",
     backend="matplotlib",
     is_x_timestamp=False,
