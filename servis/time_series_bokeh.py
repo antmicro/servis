@@ -418,11 +418,11 @@ def create_bokeh_plot(
         y_range: Optional[Tuple] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
-        trimxvaluesoffsets: Optional[List[float]] = None,
+        trimxvaluesoffsets: Optional[List[float]] = [],
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
         plottype: str = 'scatter',
-        tags: List[Dict] = [],
+        tags: List[List[Dict]] = [],
         tagstype: str = "single",
         setgradientcolors: bool = False):
     """
@@ -488,12 +488,15 @@ def create_bokeh_plot(
         ytitles = [None for _ in range(plotsnumber)]
     if yunits is None:
         yunits = [None for _ in range(plotsnumber)]
+    if len(trimxvaluesoffsets) == 0:
+        trimxvaluesoffsets = [0 for i in range(plotsnumber)]
+    if len(tags) == 0:
+        tags = [[] for i in range(plotsnumber)]
 
     for subtitle, xtitle, xunit, ytitle, yunit, xdata, ydata, \
-            trimxvaluesoffset in \
+            trimxvaluesoffset, tags_for_one_plot in \
             zip(subtitles, xtitles, xunits, ytitles, yunits, xdatas,
-                ydatas, trimxvaluesoffsets):
-
+                ydatas, trimxvaluesoffsets, tags):
         ts_plots.append(time_series_plot(
             ydata,
             xdata,
@@ -507,7 +510,7 @@ def create_bokeh_plot(
             trimxvaluesoffset=trimxvaluesoffset,
             # plots should be in a ratio of 8:3
             figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
-            tags=tags,
+            tags=tags_for_one_plot,
             tagstype=tagstype,
             setgradientcolors=setgradientcolors,
             plottype=plottype

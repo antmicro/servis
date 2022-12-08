@@ -100,10 +100,10 @@ def render_time_series_plot_with_histogram(
     xdata = xdata[start:]
     ydata = ydata[start:]
 
-    minx = 0
+    offset = 0
     if trimxvalues:
-        minx = min(xdata)
-        xdata = [x - minx for x in xdata]
+        offset = min(xdata)
+        xdata = [x - offset for x in xdata]
 
     if "txt" in outputext:
         from servis.time_series_plotext import create_ascii_plot
@@ -166,7 +166,7 @@ def render_time_series_plot_with_histogram(
             y_range=y_range,
             outpath=outpath,
             outputext=["html"],
-            trimxvaluesoffsets=[minx],
+            trimxvaluesoffsets=[offset],
             plottype=plottype,
             figsize=figsize,
             bins=bins,
@@ -189,7 +189,7 @@ def render_time_series_plot_with_histogram(
             y_range=y_range,
             outpath=outpath,
             outputext=outputext,
-            trimxvaluesoffsets=[minx],
+            trimxvaluesoffsets=[offset],
             plottype=plottype,
             figsize=figsize,
             bins=bins,
@@ -218,7 +218,7 @@ def render_multiple_time_series_plot(
         bins: int = 20,
         is_x_timestamp: bool = True,
         plottype: str = 'bar',
-        tags: List[Dict] = [],
+        tags: List[List[Dict]] = [],
         tagstype: str = "single",
         backend: str = "plotext",
         setgradientcolors: bool = False):
@@ -302,8 +302,8 @@ def render_multiple_time_series_plot(
     for ydata in ydatas:
         ydata = ydata[start:]
 
+    offsets = []
     if trimxvalues:
-        offsets = []
         for xdata in xdatas:
             minx = min(xdata)
             xdata = [x - minx for x in xdata]
@@ -312,7 +312,8 @@ def render_multiple_time_series_plot(
     if "txt" in outputext:
         print('\n\n')
         from servis.time_series_plotext import create_ascii_plot
-        for title, xtitle, xunit, ytitle, yunit, ydata in zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas):  # noqa: E501
+        for title, xtitle, xunit, ytitle, yunit, ydata, xdata in \
+                zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas, xdatas):
             create_ascii_plot(
                 ydata=ydata,
                 xdata=xdata,
@@ -330,10 +331,11 @@ def render_multiple_time_series_plot(
             print('\n\n')
 
     if "png" in outputext and backend == "matplotlib":
-        from servis.time_series_matplotlib import create_multiple_matplotlib_plot  # noqa: E501
+        from servis.time_series_matplotlib \
+            import create_multiple_matplotlib_plot
         create_multiple_matplotlib_plot(
             ydatas,
-            xdata,
+            xdatas,
             title,
             subtitles,
             xtitles,
@@ -349,7 +351,7 @@ def render_multiple_time_series_plot(
         from servis.time_series_matplotlib import create_multiple_matplotlib_plot  # noqa: E501
         create_multiple_matplotlib_plot(
             ydatas,
-            xdata,
+            xdatas,
             title,
             subtitles,
             xtitles,
