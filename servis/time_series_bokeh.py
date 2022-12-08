@@ -29,27 +29,28 @@ def get_colors(data: List):
     data_colors: List
         List of colors for values given in input.
     """
+
     colors = [
-        "#c0e4eb",
-        "#c2dfe5",
-        "#c4d9df",
-        "#c7d3d9",
-        "#c9cdd3",
-        "#cbc7cc",
-        "#cdc1c5",
-        "#cfbbbe",
-        "#d1b4b7",
-        "#d3adaf",
-        "#d5a6a7",
-        "#d79e9f",
-        "#d99696",
-        "#db8e8d",
-        "#dd8583",
-        "#df7c78",
-        "#e1716c",
-        "#e3665f",
-        "#e5594f",
-        "#e74a3c"
+        "#09B194",
+        "#1FB59C",
+        "#34BBA4",
+        "#45BFAA",
+        "#5DC5B3",
+        "#6FC9B9",
+        "#82CDC0",
+        "#98D3C9",
+        "#ABD7D0",
+        "#C9DAD6",
+        "#E3CFCD",
+        "#E5C0BD",
+        "#E6B2AD",
+        "#E7A6A0",
+        "#E6968F",
+        "#E68880",
+        "#E77B72",
+        "#E66E64",
+        "#E65F52",
+        "#E74C3E",
     ]
 
     data_colors = []
