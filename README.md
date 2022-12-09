@@ -158,19 +158,21 @@ for tag in data["tags"]:
 
 render_multiple_time_series_plot(
     [ydata1, ydata2],
-    xdata,
+    [xdata]*2,
     title="Example plot",
     subtitles=["Plot1", "Plot2"],
     xtitles=["X axis"]*2,
     xunits=["unit"]*2,
     ytitles=["Y axis"]*2,
     yunits=["unit"]*2,
-    y_range=(-5, 105),
+    y_ranges=[(-5, 105)]*2,
     outpath="example_plots/multipleplot",
     outputext=["png", "html"],
-    tags=tags,
+    tags=[tags]*2,
     tagstype="single",
-    backend="matplotlib"
+    backend="matplotlib",
+    is_x_timestamp=False,
+    setgradientcolors=True
 )
 ```
 
