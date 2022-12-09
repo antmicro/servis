@@ -162,15 +162,15 @@ def render_time_series_plot_with_histogram(
             xunits=[xunit],
             ytitles=[ytitle],
             yunits=[yunit],
-            x_range=x_range,
-            y_range=y_range,
+            x_ranges=[x_range],
+            y_ranges=[y_range],
             outpath=outpath,
             outputext=["html"],
             trimxvaluesoffsets=[offset],
             plottype=plottype,
             figsize=figsize,
             bins=bins,
-            tags=tags,
+            tags=[tags],
             tagstype=tagstype
         )
 
@@ -185,15 +185,15 @@ def render_time_series_plot_with_histogram(
             xunits=[xunit],
             ytitles=[ytitle],
             yunits=[yunit],
-            x_range=x_range,
-            y_range=y_range,
+            x_ranges=[x_range],
+            y_ranges=[y_range],
             outpath=outpath,
             outputext=outputext,
             trimxvaluesoffsets=[offset],
             plottype=plottype,
             figsize=figsize,
             bins=bins,
-            tags=tags,
+            tags=[tags],
             tagstype=tagstype,
             setgradientcolors=setgradientcolors
         )
@@ -208,8 +208,8 @@ def render_multiple_time_series_plot(
         xunits: List[str],
         ytitles: List[str],
         yunits: List[str],
-        x_range: Optional[Tuple] = None,
-        y_range: Optional[Tuple] = None,
+        x_ranges: Optional[List[Tuple]] = None,
+        y_ranges: Optional[List[Tuple]] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
         trimxvalues: bool = True,
@@ -309,11 +309,18 @@ def render_multiple_time_series_plot(
             xdata = [x - minx for x in xdata]
             offsets.append(minx)
 
+    if y_ranges is None:
+        y_ranges = [None for _ in range(len(ydatas))]
+    if x_ranges is None:
+        x_ranges = [None for _ in range(len(ydatas))]
+
     if "txt" in outputext:
         print('\n\n')
         from servis.time_series_plotext import create_ascii_plot
-        for title, xtitle, xunit, ytitle, yunit, ydata, xdata in \
-                zip(subtitles, xtitles, xunits, ytitles, yunits, ydatas, xdatas):
+        for title, xtitle, xunit, ytitle, yunit, ydata, xdata, \
+                x_range, y_range in zip(
+                    subtitles, xtitles, xunits, ytitles, yunits,
+                    ydatas, xdatas, x_ranges, y_ranges):
             create_ascii_plot(
                 ydata=ydata,
                 xdata=xdata,
@@ -374,8 +381,8 @@ def render_multiple_time_series_plot(
             xunits=xunits,
             ytitles=ytitles,
             yunits=yunits,
-            x_range=x_range,
-            y_range=y_range,
+            x_ranges=x_ranges,
+            y_ranges=y_ranges,
             outpath=outpath,
             outputext=["html"],
             trimxvaluesoffsets=offsets,
@@ -397,8 +404,8 @@ def render_multiple_time_series_plot(
             xunits=xunits,
             ytitles=ytitles,
             yunits=yunits,
-            x_range=x_range,
-            y_range=y_range,
+            x_ranges=x_ranges,
+            y_ranges=y_ranges,
             outpath=outpath,
             outputext=outputext,
             trimxvaluesoffsets=offsets,

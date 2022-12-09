@@ -414,8 +414,8 @@ def create_bokeh_plot(
         xunits: Optional[List[str]],
         ytitles: Optional[List[str]],
         yunits: Optional[List[str]],
-        x_range: Optional[Tuple] = None,
-        y_range: Optional[Tuple] = None,
+        x_ranges: Optional[Tuple] = None,
+        y_ranges: Optional[Tuple] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
         trimxvaluesoffsets: Optional[List[float]] = [],
@@ -494,9 +494,9 @@ def create_bokeh_plot(
         tags = [[] for i in range(plotsnumber)]
 
     for subtitle, xtitle, xunit, ytitle, yunit, xdata, ydata, \
-            trimxvaluesoffset, tags_for_one_plot in \
+            trimxvaluesoffset, tags_for_one_plot, x_range, y_range in \
             zip(subtitles, xtitles, xunits, ytitles, yunits, xdatas,
-                ydatas, trimxvaluesoffsets, tags):
+                ydatas, trimxvaluesoffsets, tags, x_ranges, y_ranges):
         ts_plots.append(time_series_plot(
             ydata,
             xdata,

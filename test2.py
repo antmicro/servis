@@ -24,7 +24,7 @@ render_multiple_time_series_plot(
     xunits=["unit"]*2,
     ytitles=["Y axis"]*2,
     yunits=["unit"]*2,
-    y_range=(-5, 105),
+    y_ranges=[(-5, 105)]*2,
     outpath="example_plots/multipleplot",
     outputext=["png", "html"],
     tags=[tags]*2,
