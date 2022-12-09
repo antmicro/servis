@@ -232,10 +232,17 @@ def render_multiple_time_series_plot(
 
     Parameters
     ----------
+<<<<<<< HEAD
     ydatas : List[List]
         The list of list of values for Y dimension for every plot
     xdatas : List[List]
         The list of list of values for X dimension for every plot
+=======
+    ydatas : List
+        The values for Y dimension
+    xdatas : List
+        The values for X dimension
+>>>>>>> ee21342 ([#38883] servis: time_series, time_series_bokeh: Updated docstrings)
     title : List[str]
         Title of the plot
     subtitles : List[str]
@@ -248,10 +255,10 @@ def render_multiple_time_series_plot(
         Name of the Y axis
     yunits : List[str]
         Unit for the Y axis
-    x_range : Optional[Tuple]
-        The range of zoom on X axis
-    y_range : Optional[Tuple]
-        The range of zoom on Y axis
+    x_ranges : Optional[List[Tuple]]
+        The list of ranges of zoom for each X axis
+    y_ranges : Optional[List[Tuple]]
+        The list of ranges of zoom for each Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
     outputext: List[str]
@@ -276,7 +283,7 @@ def render_multiple_time_series_plot(
     plottype: str
         Type of the plot. Depends on backend
     tags: list
-        List of tags and their timestamps
+        List of tags and their timestamps for each X-axis
     tagstype: str
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)

@@ -414,8 +414,8 @@ def create_bokeh_plot(
         xunits: Optional[List[str]],
         ytitles: Optional[List[str]],
         yunits: Optional[List[str]],
-        x_ranges: Optional[Tuple] = None,
-        y_ranges: Optional[Tuple] = None,
+        x_ranges: Optional[List[Tuple]] = None,
+        y_ranges: Optional[List[Tuple]] = None,
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['txt'],
         trimxvaluesoffsets: Optional[List[float]] = [],
@@ -446,10 +446,10 @@ def create_bokeh_plot(
         Name of the Y axis
     yunits : Optional[List[str]]
         Unit for the Y axis
-    x_range : Optional[Tuple]
-        The range of zoom on X axis
-    y_range : Optional[Tuple]
-        The range of zoom on Y axis
+    x_ranges : Optional[List[Tuple]]
+        The list of ranges of zoom for each X axis
+    y_ranges : Optional[List[Tuple]]
+        The list of ranges of zoom for each Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
     outputext: List[str]
@@ -468,7 +468,7 @@ def create_bokeh_plot(
     plottype: str
         Can be 'scatter' or 'bar'
     tags: list
-        List of tags and their timestamps
+        List of tags and their timestamps for each X-axis
     tagstype: str
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
