@@ -200,8 +200,8 @@ def render_time_series_plot_with_histogram(
 
 
 def render_multiple_time_series_plot(
-        ydatas: List,
-        xdatas: List,
+        ydatas: List[List],
+        xdatas: List[List],
         title: str,
         subtitles: List[str],
         xtitles: List[str],
@@ -232,10 +232,10 @@ def render_multiple_time_series_plot(
 
     Parameters
     ----------
-    ydatas : List
-        The values for Y dimension
-    xdata : List
-        The values for X dimension
+    ydatas : List[List]
+        The list of list of values for Y dimension for every plot
+    xdatas : List[List]
+        The list of list of values for X dimension for every plot
     title : List[str]
         Title of the plot
     subtitles : List[str]
