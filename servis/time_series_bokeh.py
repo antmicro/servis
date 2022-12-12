@@ -430,10 +430,10 @@ def create_bokeh_plot(
 
     Parameters
     ----------
-    ydatas : List
-        The values for Y dimension
-    xdatas : List
-        The values for X dimension
+    ydatas : List[List]
+        The list of lists of values for Y dimension for every plot
+    xdatas : List[List]
+        The list of lists of values for X dimension for every plot
     title : Optional[List[str]]
         Title of the plot
     subtitles : Optional[List[str]]
