@@ -1,5 +1,7 @@
 from typing import List, Tuple, Optional
 import datetime
+from contextlib import redirect_stdout
+from pathlib import Path
 
 
 def create_ascii_plot(
@@ -113,7 +115,7 @@ def create_ascii_plot(
     plotext.show()
 
 
-def create_multiple_ascii_plot(
+def render_ascii_plot(
         ydatas: List,
         xdatas: List,
         titles: List[str],
@@ -123,6 +125,7 @@ def create_multiple_ascii_plot(
         yunits: List[str],
         x_ranges: Optional[List[Tuple]] = None,
         y_ranges: Optional[List[Tuple]] = None,
+        outpath: Optional[Path] = None,
         figsize: Tuple = None,
         is_x_timestamp: bool = True,
         plottype: str = 'bar'):
@@ -151,6 +154,8 @@ def create_multiple_ascii_plot(
         The ranges of zoom on X axes
     y_ranges : Optional[Tuple]
         The ranges of zoom on Y axes
+    outpath : Optional[Path]
+        Output path for the plot image. If None, the plot will be displayed.
     figsize : Optional[Tuple]
         The size of the figure
     is_x_timestamp:
@@ -160,23 +165,49 @@ def create_multiple_ascii_plot(
         Can be 'scatter', 'bar' or 'line'
     """
 
-    print('\n\n')
-    for title, xtitle, xunit, ytitle, yunit, ydata, xdata, \
-        x_range, y_range in zip(
-            titles, xtitles, xunits, ytitles, yunits,
-            ydatas, xdatas, x_ranges, y_ranges):
-        create_ascii_plot(
-            ydata=ydata,
-            xdata=xdata,
-            title=title,
-            xtitle=xtitle,
-            xunit=xunit,
-            ytitle=ytitle,
-            yunit=yunit,
-            x_range=x_range,
-            y_range=y_range,
-            figsize=figsize,
-            plottype=plottype,
-            is_x_timestamp=is_x_timestamp
-        )
+    if outpath is not None:
+        outpath = f'{outpath}.ascii'
+        with open(outpath, 'w') as outfile:
+            with redirect_stdout(outfile):
+                print('\n\n')
+                for title, xtitle, xunit, ytitle, yunit, ydata, xdata, \
+                    x_range, y_range in zip(
+                        titles, xtitles, xunits, ytitles, yunits,
+                        ydatas, xdatas, x_ranges, y_ranges):
+                    create_ascii_plot(
+                        ydata=ydata,
+                        xdata=xdata,
+                        title=title,
+                        xtitle=xtitle,
+                        xunit=xunit,
+                        ytitle=ytitle,
+                        yunit=yunit,
+                        x_range=x_range,
+                        y_range=y_range,
+                        figsize=figsize,
+                        plottype=plottype,
+                        is_x_timestamp=is_x_timestamp
+                    )
+                    print('\n\n')
+
+    else:
         print('\n\n')
+        for title, xtitle, xunit, ytitle, yunit, ydata, xdata, \
+            x_range, y_range in zip(
+                titles, xtitles, xunits, ytitles, yunits,
+                ydatas, xdatas, x_ranges, y_ranges):
+            create_ascii_plot(
+                ydata=ydata,
+                xdata=xdata,
+                title=title,
+                xtitle=xtitle,
+                xunit=xunit,
+                ytitle=ytitle,
+                yunit=yunit,
+                x_range=x_range,
+                y_range=y_range,
+                figsize=figsize,
+                plottype=plottype,
+                is_x_timestamp=is_x_timestamp
+            )
+            print('\n\n')

@@ -4,7 +4,6 @@ Functions to creating and rendering time series plots in various formats
 
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
-from contextlib import redirect_stdout
 
 
 def render_time_series_plot_with_histogram(
@@ -107,40 +106,23 @@ def render_time_series_plot_with_histogram(
         xdata = [x - offset for x in xdata]
 
     if "txt" in outputext:
-        from servis.time_series_plotext import create_ascii_plot
-        if outpath is not None:
-            outpath = f'{outpath}.ascii'
-            with open(outpath, 'w') as outfile:
-                with redirect_stdout(outfile):
-                    create_ascii_plot(
-                        ydata,
-                        xdata,
-                        title=title,
-                        xtitle=xtitle,
-                        xunit=xunit,
-                        ytitle=ytitle,
-                        yunit=yunit,
-                        x_range=x_range,
-                        y_range=y_range,
-                        is_x_timestamp=is_x_timestamp,
-                        plottype=plottype,
-                        figsize=figsize
-                    )
-        else:
-            create_ascii_plot(
-                ydata,
-                xdata,
-                title=title,
-                xtitle=xtitle,
-                xunit=xunit,
-                ytitle=ytitle,
-                yunit=yunit,
-                x_range=x_range,
-                y_range=y_range,
-                is_x_timestamp=is_x_timestamp,
-                plottype=plottype,
-                figsize=figsize
-            )
+        from servis.time_series_plotext import render_ascii_plot
+
+        render_ascii_plot(
+            [ydata],
+            [xdata],
+            titles=[title],
+            xtitles=[xtitle],
+            xunits=[xunit],
+            ytitles=[ytitle],
+            yunits=[yunit],
+            x_ranges=[x_range],
+            y_ranges=[y_range],
+            outpath=f'{outpath}.ascii',
+            figsize=figsize,
+            is_x_timestamp=is_x_timestamp,
+            plottype=plottype
+        )
 
     if "png" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib import create_matplotlib_plot
@@ -336,42 +318,23 @@ def render_multiple_time_series_plot(
         x_ranges = [None for _ in range(len(ydatas))]
 
     if "txt" in outputext:
-        print('\n\n')
-        from servis.time_series_plotext import create_multiple_ascii_plot
+        from servis.time_series_plotext import render_ascii_plot
 
-        if outpath is not None:
-            outpath = f'{outpath}.ascii'
-            with open(outpath, 'w') as outfile:
-                with redirect_stdout(outfile):
-                    create_multiple_ascii_plot(
-                        ydatas=ydatas,
-                        xdatas=xdatas,
-                        titles=subtitles,
-                        xtitles=xtitles,
-                        xunits=xunits,
-                        ytitles=ytitles,
-                        yunits=yunits,
-                        x_ranges=x_ranges,
-                        y_ranges=y_ranges,
-                        is_x_timestamp=is_x_timestamp,
-                        plottype=plottype,
-                        figsize=figsize
-                    )
-        else:
-            create_multiple_ascii_plot(
-                ydatas=ydatas,
-                xdatas=xdatas,
-                titles=subtitles,
-                xtitles=xtitles,
-                xunits=xunits,
-                ytitles=ytitles,
-                yunits=yunits,
-                x_ranges=x_ranges,
-                y_ranges=y_ranges,
-                is_x_timestamp=is_x_timestamp,
-                plottype=plottype,
-                figsize=figsize
-            )
+        render_ascii_plot(
+            ydatas=ydatas,
+            xdatas=xdatas,
+            titles=subtitles,
+            xtitles=xtitles,
+            xunits=xunits,
+            ytitles=ytitles,
+            yunits=yunits,
+            x_ranges=x_ranges,
+            y_ranges=y_ranges,
+            outpath=f'{outpath}.ascii',
+            figsize=figsize,
+            is_x_timestamp=is_x_timestamp,
+            plottype=plottype
+        )
 
     if "png" in outputext and backend == "matplotlib":
         from servis.time_series_matplotlib \
@@ -391,7 +354,8 @@ def render_multiple_time_series_plot(
         )
 
     if "svg" in outputext and backend == "matplotlib":
-        from servis.time_series_matplotlib import create_multiple_matplotlib_plot  # noqa: E501
+        from servis.time_series_matplotlib \
+            import create_multiple_matplotlib_plot
         create_multiple_matplotlib_plot(
             ydatas,
             xdatas,
