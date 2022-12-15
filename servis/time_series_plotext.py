@@ -123,7 +123,7 @@ def create_multiple_ascii_plot(
         yunits: List[str],
         x_ranges: Optional[List[Tuple]] = None,
         y_ranges: Optional[List[Tuple]] = None,
-        figsize: Tuple = (1500, 1080),
+        figsize: Tuple = None,
         is_x_timestamp: bool = True,
         plottype: str = 'bar'):
     """

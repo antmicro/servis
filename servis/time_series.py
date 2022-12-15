@@ -123,7 +123,8 @@ def render_time_series_plot_with_histogram(
                         x_range=x_range,
                         y_range=y_range,
                         is_x_timestamp=is_x_timestamp,
-                        plottype=plottype
+                        plottype=plottype,
+                        figsize=figsize
                     )
         else:
             create_ascii_plot(
@@ -137,7 +138,8 @@ def render_time_series_plot_with_histogram(
                 x_range=x_range,
                 y_range=y_range,
                 is_x_timestamp=is_x_timestamp,
-                plottype=plottype
+                plottype=plottype,
+                figsize=figsize
             )
 
     if "png" in outputext and backend == "matplotlib":
@@ -352,7 +354,8 @@ def render_multiple_time_series_plot(
                         x_ranges=x_ranges,
                         y_ranges=y_ranges,
                         is_x_timestamp=is_x_timestamp,
-                        plottype=plottype
+                        plottype=plottype,
+                        figsize=figsize
                     )
         else:
             create_multiple_ascii_plot(
@@ -366,7 +369,8 @@ def render_multiple_time_series_plot(
                 x_ranges=x_ranges,
                 y_ranges=y_ranges,
                 is_x_timestamp=is_x_timestamp,
-                plottype=plottype
+                plottype=plottype,
+                figsize=figsize
             )
 
     if "png" in outputext and backend == "matplotlib":
