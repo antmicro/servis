@@ -166,7 +166,6 @@ def render_ascii_plot(
     """
 
     if outpath is not None:
-        outpath = f'{outpath}.ascii'
         with open(outpath, 'w') as outfile:
             with redirect_stdout(outfile):
                 print('\n\n')
