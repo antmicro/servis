@@ -417,7 +417,7 @@ def create_bokeh_plot(
         x_ranges: Optional[List[Tuple]] = None,
         y_ranges: Optional[List[Tuple]] = None,
         outpath: Optional[Path] = None,
-        outputext: Optional[List[str]] = ['txt'],
+        outputext: Optional[List[str]] = ['html'],
         trimxvaluesoffsets: Optional[List[float]] = [],
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
