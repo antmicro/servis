@@ -366,7 +366,7 @@ def value_histogram(
 
     data_colors = "#E74A3C"
     if setgradientcolors is True:
-        data_colors = get_colors(edges[:-1])
+        data_colors = get_colors(edges[1:])
 
     plot.quad(top=edges[1:], bottom=edges[:-1], left=hist, right=0.00001,
               fill_color=data_colors, line_color=data_colors, alpha=1)
