@@ -311,7 +311,7 @@ def time_series_plot(
                   fill_color=data_colors,
                   line_color=data_colors)
     elif plottype == 'scatter':
-        plot.scatter(x=xdata, y=ydata, size=10, color=data_colors)
+        plot.scatter(x=xdata, y=ydata, size=6, color=data_colors)
 
     return plot
 
