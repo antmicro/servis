@@ -159,7 +159,7 @@ def render_time_series_plot_with_histogram(
         create_bokeh_plot(
             ydatas=[ydata],
             xdatas=[xdata],
-            title=title,
+            title=None,
             subtitles=[title],
             xtitles=[xtitle],
             xunits=[xunit],
@@ -182,7 +182,7 @@ def render_time_series_plot_with_histogram(
         create_bokeh_plot(
             ydatas=[ydata],
             xdatas=[xdata],
-            title=title,
+            title=None,
             subtitles=[title],
             xtitles=[xtitle],
             xunits=[xunit],
