@@ -1,11 +1,16 @@
-from typing import List, Dict, Tuple, Optional
-from bokeh.plotting import output_file, show, save, figure as bkfigure
+from typing import List, Dict, Tuple, Optional, Iterator
+from bokeh.plotting import output_file, show, save, figure as bkfigure, Figure
 from bokeh.models import Range1d, ColumnDataSource, Span, LabelSet, Div
 from numpy import histogram, float_
 from bokeh.io import export_png, export_svg
 from pathlib import Path
 from bokeh.layouts import gridplot
 import re
+
+from servis.utils import get_colormap_for_bokeh
+
+BETWEEN_SECTION_MARGIN_PERCENT = 0.1
+BETWEEN_BAR_MARGIN_PERCENT = 0.
 
 
 def get_colors(data: List):
@@ -17,16 +22,14 @@ def get_colors(data: List):
     and the color changes to redder every 5 percentage
     points.
 
-    Parameters:
+    Parameters
     ----------
-
-    data: List
+    data : List
         List of values for which the colors will be generated.
 
-    Returns:
-    --------
-
-    data_colors: List
+    Returns
+    -------
+    data_colors : List
         List of colors for values given in input.
     """
 
@@ -78,22 +81,22 @@ def add_tags(
         Bokeh figure to which tags will be added
     tags : List
         List with tags and their timestamps
-    tagstype: str
+    tagstype : str
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
-    trimxvaluesoffset: float
+    trimxvaluesoffset : float
         The number by which the values will be trimmed
-    max_y_value: float
+    max_y_value : float
         The highest value in ydata
-    min_y_value: float
+    min_y_value : float
         The lowest value in ydata
-    yrange: Optional[Tuple]
+    yrange : Optional[Tuple]
         The range of zoom on Y axis
 
     Returns
     -------
-    plot: bkfigure
+    plot : bkfigure
         plot with added tags
     """
     if tagstype == 'single':
@@ -201,8 +204,10 @@ def time_series_plot(
         figsize: Tuple = (1500, 850),
         tags: List = [],
         tagstype: str = 'single',
+        colors: Optional[Iterator[str]] = None,  # TODO: default color, per lib
         setgradientcolors: bool = False,
-        plottype: str = 'scatter'):
+        plottype: str = 'scatter',
+        figure: Optional[Figure] = None):
     """
     Returns time series plot.
 
@@ -230,78 +235,87 @@ def time_series_plot(
         The range of zoom on Y axis
     trimxvaluesoffset: float
         The number by which the values will be trimmed
-    figsize: Tuple
+    figsize : Tuple
         The size of the figure
-    tags: list
+    tags : list
         List of tags and their timestamps
-    tagstype: str
+    tagstype : str
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
-    setgradientcolors:
+    colors : Optional[Iterator[str]]
+        Iteretor with colors for sets of data
+    setgradientcolors :
         True if gradient colors instead of one color should be set.
         False otherwise.
-    plottype: str
+    plottype : str
         Can be 'scatter' or 'bar'
+    figure : Optional[bokeh.plotting.Figure]
+        Figure to make plot
 
     Returns
     -------
-    plot: bkfigure
+    plot : bkfigure
         Returns time series plot
     """
     assert plottype in ['scatter', 'bar']
-    xlabel = None
-    if xtitle:
-        xlabel = xtitle
-        if xunit is not None:
-            xlabel += f' [{xunit}]'
 
-    ylabel = None
-    if ytitle:
-        ylabel = ytitle
-        if yunit is not None:
-            ylabel += f' [{yunit}]'
+    if figure is None:
+        xlabel = None
+        if xtitle:
+            xlabel = xtitle
+            if xunit is not None:
+                xlabel += f' [{xunit}]'
 
-    plot = bkfigure(width=int(figsize[0]),
-                    height=figsize[1],
-                    min_border=10,
-                    title=title,
-                    x_axis_label=xlabel,
-                    y_axis_label=ylabel,
-                    x_axis_type="datetime",
-                    toolbar_location=None,
-                    output_backend='webgl')
+        ylabel = None
+        if ytitle:
+            ylabel = ytitle
+            if yunit is not None:
+                ylabel += f' [{yunit}]'
 
-    if x_range is not None:
-        plot.x_range = Range1d(x_range[0], x_range[1])
-    if y_range is not None:
-        plot.y_range = Range1d(y_range[0], y_range[1])
+        plot = bkfigure(width=int(figsize[0]),
+                        height=figsize[1],
+                        min_border=10,
+                        title=title,
+                        x_axis_label=xlabel,
+                        y_axis_label=ylabel,
+                        x_axis_type="datetime",
+                        toolbar_location=None,
+                        output_backend='webgl',
+                        sizing_mode='scale_height')
 
-    # adding tagging visualizations to the plot
-    if len(tags) > 0:
-        plot = add_tags(plot,
-                        tags,
-                        tagstype,
-                        trimxvaluesoffset=-trimxvaluesoffset,
-                        max_y_value=max(ydata),
-                        min_y_value=min(ydata),
-                        yrange=y_range)
+        if title:
+            plot.title.text_font_size = '18pt'
+            plot.title.text_font = 'Lato'
+        if xtitle:
+            plot.xaxis.axis_label_text_font_size = '14pt'
+            plot.xaxis.axis_label_text_font_style = 'normal'
+            plot.xaxis.axis_label_text_font = 'Lato'
+        if ytitle:
+            plot.yaxis.axis_label_text_font_size = '14pt'
+            plot.yaxis.axis_label_text_font_style = 'normal'
+            plot.yaxis.axis_label_text_font = 'Lato'
 
-    if title:
-        plot.title.text_font_size = '18pt'
-        plot.title.text_font = 'Lato'
-    if xtitle:
-        plot.xaxis.axis_label_text_font_size = '14pt'
-        plot.xaxis.axis_label_text_font_style = 'normal'
-        plot.xaxis.axis_label_text_font = 'Lato'
-    if ytitle:
-        plot.yaxis.axis_label_text_font_size = '14pt'
-        plot.yaxis.axis_label_text_font_style = 'normal'
-        plot.yaxis.axis_label_text_font = 'Lato'
+        if x_range is not None:
+            plot.x_range = Range1d(x_range[0], x_range[1])
+        if y_range is not None:
+            plot.y_range = Range1d(y_range[0], y_range[1])
 
-    data_colors = "#E74A3C"
-    if setgradientcolors is True:
-        data_colors = get_colors(ydata[0:-1])
+        # adding tagging visualizations to the plot
+        if len(tags) > 0:
+            plot = add_tags(plot,
+                            tags,
+                            tagstype,
+                            trimxvaluesoffset=-trimxvaluesoffset,
+                            max_y_value=max(ydata),
+                            min_y_value=min(ydata),
+                            yrange=y_range)
+    else:
+        plot = figure
+
+    # data_colors = "#E74A3C"
+    # if setgradientcolors is True:
+    data_colors = next(colors)
 
     if plottype == 'bar':
         plot.quad(top=ydata[:-1],
@@ -311,7 +325,8 @@ def time_series_plot(
                   fill_color=data_colors,
                   line_color=data_colors)
     elif plottype == 'scatter':
-        plot.scatter(x=xdata, y=ydata, size=6, color=data_colors)
+        plot.scatter(x=xdata, y=ydata, size=6, alpha=0.5, line_color=None,
+                     color=data_colors)
 
     return plot
 
@@ -321,7 +336,12 @@ def value_histogram(
         yrange: Optional[Range1d] = None,
         figsize: Tuple = (1500, 850),
         bins: int = 20,
-        setgradientcolors: bool = False):
+        colors: Optional[Iterator[str]] = None,  # TODO
+        setgradientcolors: bool = False,
+        histogram_range: Tuple = None,
+        data_id: Optional[int] = None,
+        data_len: Optional[int] = None,
+        figure: Optional[Figure] = None):
     """
     Returns the histogram of values that appeared throughout the
     experiment.
@@ -332,44 +352,73 @@ def value_histogram(
         The values for Y dimension
     yrange : Optional[Tuple]
         The range of zoom on Y axis
-    figsize: Tuple
+    figsize : Tuple
         The size of the figure
-    bins: int
+    bins : int
         Number of bins for value histograms
-    setgradientcolors: bool
+    colors : Optional[Iterator[str]]
+        Iteretor with colors for sets of data
+    setgradientcolors : bool
         True if gradient colors from turquoise to raspberry red
         instead of one color should be set. False otherwise.
+    histogram_range : Optional[Tuple]
+        Union of ranges of all sets of data
+    data_id : Optional[int]
+        Number of set
+    data_len : Optional[int]
+        Quantity of sets
+    figure : Optional[bokeh.plotting.Figure]
+        Figure to make plot
 
     Returns
     -------
-    plot: bkfigure
+    plot : bkfigure
         the histogram with logarithmic scale on x-axis
     """
 
-    plot = bkfigure(plot_width=int(figsize[0]),
-                    plot_height=figsize[1],
-                    min_border=10,
-                    x_axis_label='Value histogram',
-                    x_axis_type='log',
-                    toolbar_location="above",
-                    tools="save",
-                    y_range=yrange,
-                    output_backend='webgl')
+    if figure is None:
+        plot = bkfigure(plot_width=int(figsize[0]),
+                        plot_height=figsize[1],
+                        min_border=10,
+                        x_axis_label='Value histogram',
+                        x_axis_type='log',
+                        toolbar_location="above",
+                        tools="save",
+                        y_range=yrange,
+                        output_backend='webgl',
+                        sizing_mode='scale_height')
 
-    plot.yaxis.visible = False
-    plot.x_range.start = 1
-    plot.xaxis.axis_label_text_font_size = '14pt'
-    plot.xaxis.axis_label_text_font_style = 'normal'
-    plot.xaxis.axis_label_text_font = 'Lato'
+        plot.yaxis.visible = False
+        plot.yaxis.axis_line_color = None
+        plot.yaxis.minor_tick_line_color = None
+        plot.yaxis.major_label_text_color = None
+        plot.x_range.start = 0.9
+        plot.xaxis.axis_label_text_font_size = '14pt'
+        plot.xaxis.axis_label_text_font_style = 'normal'
+        plot.xaxis.axis_label_text_font = 'Lato'
+    else:
+        plot = figure
 
-    hist, edges = histogram(ydata, bins=bins)
+    hist, edges = histogram(ydata, bins=bins, range=histogram_range)
+    plot.yaxis.ticker = edges
 
-    data_colors = "#E74A3C"
-    if setgradientcolors is True:
-        data_colors = get_colors(edges[1:])
+    data_colors = next(colors)
+    # if setgradientcolors is True:
+    #     data_colors = get_colors(edges[1:])
 
-    plot.quad(top=edges[1:], bottom=edges[:-1], left=hist, right=0.00001,
-              fill_color=data_colors, line_color=data_colors, alpha=1)
+    if data_id is None or data_len is None:
+        tops = edges[1:]
+        bottoms = edges[:-1]
+    else:
+        space_between = edges[1]-edges[0]
+        margin = space_between*BETWEEN_SECTION_MARGIN_PERCENT
+        bar_width = (space_between-2*margin)/data_len
+        bar_margin = bar_width*BETWEEN_BAR_MARGIN_PERCENT
+        bottoms = [e+margin+data_id*bar_width+bar_margin for e in edges[:-1]]
+        tops = [b+bar_width-2*bar_margin for b in bottoms]
+    plot.quad(top=tops, bottom=bottoms,
+              right=hist, left=0.00001, alpha=1,
+              fill_color=data_colors, line_color=data_colors)
 
     return plot
 
@@ -424,7 +473,8 @@ def create_bokeh_plot(
         plottype: str = 'scatter',
         tags: List[List[Dict]] = [],
         tagstype: str = "single",
-        setgradientcolors: bool = False):
+        setgradientcolors: bool = False,
+        render_on_plot: bool = False):
     """
     Draws and saves time series plot using Bokeh
 
@@ -452,33 +502,39 @@ def create_bokeh_plot(
         The list of ranges of zoom for each Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
-    outputext: List[str]
+    outputext : List[str]
         Extension of generated file.
         "html" for HTML file,
         "png" for PNG file,
         "svg" for SVG file,
         "txt" for TXT file
-    trimxvaluesoffsets: List[float]
+    trimxvaluesoffsets : List[float]
         The  list of offsets - numbers by which the tags timestamps values
         will be trimmed
-    figsize: Tuple
+    figsize : Tuple
         The size of the figure
-    bins: int
+    bins : int
         Number of bins for value histograms
-    plottype: str
+    plottype : str
         Can be 'scatter' or 'bar'
-    tags: list
+    tags : list
         List of tags and their timestamps for each X-axis
-    tagstype: str
+    tagstype : str
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
+    render_one_plot : bool
+        Use one plot to render all data, or split to one subplot for each
+        set of data
     """
 
     ts_plots = []
     val_histograms = []
 
-    plotsnumber = len(ydatas)
+    if render_on_plot:
+        plotsnumber = 1
+    else:
+        plotsnumber = len(ydatas)
 
     if xtitles is None:
         xtitles = [None for _ in range(plotsnumber)]
@@ -493,40 +549,88 @@ def create_bokeh_plot(
     if len(tags) == 0:
         tags = [[] for i in range(plotsnumber)]
 
-    for subtitle, xtitle, xunit, ytitle, yunit, xdata, ydata, \
-            trimxvaluesoffset, tags_for_one_plot, x_range, y_range in \
-            zip(subtitles, xtitles, xunits, ytitles, yunits, xdatas,
-                ydatas, trimxvaluesoffsets, tags, x_ranges, y_ranges):
-        ts_plots.append(time_series_plot(
-            ydata,
-            xdata,
-            subtitle,
-            xtitle,
-            xunit,
-            ytitle,
-            yunit,
-            x_range,
-            y_range,
-            trimxvaluesoffset=trimxvaluesoffset,
-            # plots should be in a ratio of 8:3
-            figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
-            tags=tags_for_one_plot,
-            tagstype=tagstype,
-            setgradientcolors=setgradientcolors,
-            plottype=plottype
-        ))
+    plot_colors = get_colormap_for_bokeh('Set1', len(ydatas))
+    hist_colors = get_colormap_for_bokeh('Set1', len(ydatas))
 
-        val_histograms.append(value_histogram(
-            list(float_(ydata)),
-            ts_plots[-1].y_range,
-            # plots should be in a ratio of 8:3
-            figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
-            bins=bins,
-            setgradientcolors=setgradientcolors
-        ))
+    if render_on_plot:
+        plot, hist = None, None
+        hist_range = (
+            min([min(ydata) for ydata in ydatas]),
+            max([max(ydata) for ydata in ydatas])
+        )
+        for i, (xdata, ydata) in enumerate(zip(xdatas, ydatas)):
+            plot = time_series_plot(
+                ydata,
+                xdata,
+                subtitles[0],
+                xtitles[0],
+                xunits[0],
+                ytitles[0],
+                yunits[0],
+                x_ranges[0],
+                y_ranges[0],
+                trimxvaluesoffsets[0],
+                colors=plot_colors,
+                figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
+                tags=tags[0],
+                tagstype=tagstype,
+                setgradientcolors=setgradientcolors,
+                plottype=plottype,
+                figure=plot
+            )
+            hist = value_histogram(
+                list(float_(ydata)),
+                plot.y_range,
+                figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
+                bins=bins,
+                colors=hist_colors,
+                setgradientcolors=setgradientcolors,
+                histogram_range=hist_range,
+                data_id=i,
+                data_len=len(ydatas),
+                figure=hist
+            )
+        ts_plots = [plot]
+        val_histograms = [hist]
+    else:
+        for subtitle, xtitle, xunit, ytitle, yunit, xdata, ydata, \
+                trimxvaluesoffset, tags_for_one_plot, x_range, y_range in \
+                zip(subtitles, xtitles, xunits, ytitles, yunits, xdatas,
+                    ydatas, trimxvaluesoffsets, tags, x_ranges, y_ranges):
+            ts_plots.append(time_series_plot(
+                ydata,
+                xdata,
+                subtitle,
+                xtitle,
+                xunit,
+                ytitle,
+                yunit,
+                x_range,
+                y_range,
+                colors=plot_colors,
+                trimxvaluesoffset=trimxvaluesoffset,
+                # plots should be in a ratio of 8:3
+                figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
+                tags=tags_for_one_plot,
+                tagstype=tagstype,
+                setgradientcolors=setgradientcolors,
+                plottype=plottype
+            ))
+
+            val_histograms.append(value_histogram(
+                list(float_(ydata)),
+                ts_plots[-1].y_range,
+                # plots should be in a ratio of 8:3
+                figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
+                bins=bins,
+                colors=hist_colors,
+                setgradientcolors=setgradientcolors
+            ))
 
     if title:
-        div = Div(text=f'<p style="font-family:Lato"> {title}')
+        div = Div(
+            text=f'<p style="font-family:Lato"> {title}',
+            sizing_mode='scale_width')
         plots = [[div]]
     else:
         plots = []
@@ -534,7 +638,8 @@ def create_bokeh_plot(
     for ts_plot, val_hist in zip(ts_plots, val_histograms):
         plots.append([ts_plot, val_hist])
 
-    multiple_plot = gridplot(plots, merge_tools=True)
+    multiple_plot = gridplot(plots, merge_tools=True,
+                             sizing_mode='stretch_width')
     if outpath is None:
         show(multiple_plot)
 
@@ -546,7 +651,8 @@ def create_bokeh_plot(
         add_font_url_to_html(output_file_name)
 
     multiple_plot = gridplot(
-        plots, merge_tools=True, toolbar_location=None)
+        plots, merge_tools=True,
+        toolbar_location=None, sizing_mode='scale_width')
 
     if "png" in outputext:
         export_png(multiple_plot, filename=f"{outpath}.png")
