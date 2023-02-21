@@ -16,7 +16,8 @@ def create_multiple_matplotlib_plot(
         yunits: Optional[List[str]] = None,
         outpath: Optional[Path] = None,
         figsize: Tuple = (1500, 1080),
-        bins: int = 20):
+        bins: int = 20,
+        render_one_plot: bool = False):
     """
     Draws time series plot.
 
@@ -43,13 +44,23 @@ def create_multiple_matplotlib_plot(
         Unit for the Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
-    figsize: Tuple
+    figsize : Tuple
         The size of the figure
-    bins: int
+    bins : int
         Number of bins for value histograms
+    render_one_plot : bool
+        Use one plot to render all data, or split to one subplot for each
+        set of data
     """
+    # TODO: colorschemes
 
-    plotsnumber = len(ydatas)
+    if render_one_plot:
+        plotsnumber = 1
+        assert all(
+            [len(arg) == 1 for arg in (xtitles, xunits, ytitles, yunits)]
+        ), "Multiple axis not supported, when rendering on only one plot"
+    else:
+        plotsnumber = len(ydatas)
 
     fig, axs = plt.subplots(
         ncols=2,
@@ -63,38 +74,44 @@ def create_multiple_matplotlib_plot(
 
     if plotsnumber == 1:
         axplot = axs[0]
-        axplot.scatter(xdatas[0], ydatas[0], c='#E74A3C', alpha=0.5)
+        for ydata, xdata in zip(ydatas, xdatas):
+            axplot.scatter(xdata, ydata, alpha=0.5)
     else:
         for ydata, xdata, axplot in zip(ydatas, xdatas, axs[:, 0]):
             axplot.scatter(xdata, ydata, c='#E74A3C', alpha=0.5)
 
-    if subtitles is not None:
+    if render_one_plot and subtitles is not None:
+        axplot.legend(subtitles)
+    elif subtitles is not None:
         for subtitle in subtitles:
             axplot.set_title(subtitle)
 
     xlabels = None
     if xtitles:
         xlabels = xtitles
-        for xunit, xlabel in zip(xunits, xlabels):
+        for i, (xunit, xlabel) in enumerate(zip(xunits, xlabels)):
             if xunits is not None:
-                xlabel += f' [{xunit}]'
+                xlabels[i] += f' [{xunit}]'
 
     ylabels = None
     if ytitles:
         ylabels = ytitles
-        for yunit, ylabel in zip(yunits, ylabels):
+        for i, (yunit, ylabel) in enumerate(zip(yunits, ylabels)):
             if yunits is not None:
-                ylabel += f' [{yunit}]'
+                ylabels[i] += f' [{yunit}]'
 
     if plotsnumber == 1:
         if xlabels:
-            axplot.set_xlabel(xlabel[0], fontsize='large')
-            axplot.set_ylabel(ylabel[0], fontsize='large')
+            axplot.set_xlabel(xlabels[0], fontsize='large')
+            axplot.set_ylabel(ylabels[0], fontsize='large')
             axplot.grid()
 
         axhist = axs[1]
-        axhist.hist(ydatas[0], bins=bins,
-                    orientation='horizontal', color='#E74A3C')
+        y_min = min([min(ydata) for ydata in ydatas])
+        y_max = max([max(ydata) for ydata in ydatas])
+        # for ydata in ydatas:
+        axhist.hist(ydatas, bins=bins, orientation='horizontal',
+                    range=(y_min, y_max))
         axhist.set_xscale('log')
         axhist.set_xlabel('Value histogram', fontsize='large')
         axhist.grid(which='both')
@@ -159,9 +176,9 @@ def create_matplotlib_plot(
         Unit for the Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
-    figsize: Tuple
+    figsize : Tuple
         The size of the figure
-    bins: int
+    bins : int
         Number of bins for value histograms
     """
 
