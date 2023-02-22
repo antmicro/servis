@@ -3,7 +3,7 @@ Functions to creating and rendering time series plots in various formats
 """
 
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union
 
 
 def render_time_series_plot_with_histogram(
@@ -27,6 +27,7 @@ def render_time_series_plot_with_histogram(
         tags: List = [],
         tagstype: str = "single",
         backend: str = "plotext",
+        colormap: Optional[Union[List, str]] = None,
         setgradientcolors: bool = False):
     """
     Draws time series plot.
@@ -57,7 +58,7 @@ def render_time_series_plot_with_histogram(
         The range of zoom on Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
-    outputext: Optional[List[str]]
+    outputext : Optional[List[str]]
         Extensions of generated files.
         "html" for HTML file,
         "png" for PNG file,
@@ -66,28 +67,31 @@ def render_time_series_plot_with_histogram(
     trimxvalues : bool
         True if all values for the X dimension should be subtracted by
         the minimal value on this dimension
-    skipfirst: bool
+    skipfirst : bool
         True if the first entry should be removed from plotting.
-    figsize: Tuple
+    figsize : Tuple
         The size of the figure
-    bins: int
+    bins : int
         Number of bins for value histograms
-    is_x_timestamp:
+    is_x_timestamp :
         Used in txt plot.
         True if x should be a timestamp,
         False if x should be converted to datetime
-    plottype: str
+    plottype : str
         Type of the plot. Depends on backend
-    tags: list
+    tags : list
         List of tags and their timestamps
-    tagstype: str
+    tagstype : str
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
-    backend: str
+    backend : str
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
-    setgradientcolors:
+    colormap : Optional[Union[List, str]]
+        List with colors (in form of sring with hashes or tuple with floats)
+        or name of colormap defined in matplotlib or bokeh
+    setgradientcolors :
         True if gradient colors instead of one color should be set
         in plot rendered using Bokeh.
         False otherwise.
@@ -136,7 +140,8 @@ def render_time_series_plot_with_histogram(
             yunit=yunit,
             outpath=f'{outpath}.png',
             figsize=(figsize[0]/100, figsize[1]/100),
-            bins=bins
+            bins=bins,
+            colormap=colormap,
         )
 
     if "svg" in outputext and backend == "matplotlib":
@@ -151,7 +156,8 @@ def render_time_series_plot_with_histogram(
             yunit=yunit,
             outpath=f'{outpath}.svg',
             figsize=(figsize[0]/100, figsize[1]/100),
-            bins=bins
+            bins=bins,
+            colormap=colormap,
         )
 
     if "html" in outputext:
@@ -174,7 +180,8 @@ def render_time_series_plot_with_histogram(
             figsize=figsize,
             bins=bins,
             tags=[tags],
-            tagstype=tagstype
+            tagstype=tagstype,
+            colormap=colormap,
         )
 
     if backend == "bokeh":
@@ -198,6 +205,7 @@ def render_time_series_plot_with_histogram(
             bins=bins,
             tags=[tags],
             tagstype=tagstype,
+            colormap=colormap,
             setgradientcolors=setgradientcolors
         )
 
@@ -224,7 +232,9 @@ def render_multiple_time_series_plot(
         tags: List[List[Dict]] = [],
         tagstype: str = "single",
         backend: str = "plotext",
-        setgradientcolors: bool = False):
+        colormap: Optional[List] = None,
+        setgradientcolors: bool = False,
+        render_one_plot: bool = False):
     """
     Draws multiple time series plot.
 
@@ -257,7 +267,7 @@ def render_multiple_time_series_plot(
         The list of ranges of zoom for each Y axis
     outpath : Optional[Path]
         Output path for the plot image. If None, the plot will be displayed.
-    outputext: List[str]
+    outputext : List[str]
         Extension of generated file.
         "html" for HTML file,
         "png" for PNG file,
@@ -266,31 +276,34 @@ def render_multiple_time_series_plot(
     trimxvalues : bool
         True if all values for the X dimension should be subtracted by
         the minimal value on this dimension
-    skipfirst: bool
+    skipfirst : bool
         True if the first entry should be removed from plotting.
-    figsize: Tuple
+    figsize : Tuple
         The size of the figure
-    bins: int
+    bins : int
         Number of bins for value histograms
-    is_x_timestamp:
+    is_x_timestamp :
         Used in txt plot.
         True if x should be a timestamp,
         False if x should be converted to datetime
-    plottype: str
+    plottype : str
         Type of the plot. Depends on backend
-    tags: list
+    tags : list
         List of tags and their timestamps for each X-axis
-    tagstype: str
+    tagstype : str
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
         timestamps.
-    backend: str
+    backend : str
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
-    setgradientcolors:
+    setgradientcolors :
         True if gradient colors instead of one color should be set
         in plot rendered using Bokeh.
         False otherwise.
+    render_one_plot : bool
+        Use one plot to render all data, or split to one subplot for each
+        set of data
     """
     assert backend in ['bokeh', 'matplotlib', 'plotext']
 
@@ -350,7 +363,9 @@ def render_multiple_time_series_plot(
             yunits,
             f'{outpath}.png',
             figsize=(figsize[0]/100, figsize[1]/100),
-            bins=bins
+            bins=bins,
+            colormap=colormap,
+            render_one_plot=render_one_plot
         )
 
     if "svg" in outputext and backend == "matplotlib":
@@ -367,7 +382,9 @@ def render_multiple_time_series_plot(
             yunits,
             f'{outpath}.svg',
             figsize=(figsize[0]/100, figsize[1]/100),
-            bins=bins
+            bins=bins,
+            colormap=colormap,
+            render_one_plot=render_one_plot
         )
 
     if "html" in outputext:
@@ -391,7 +408,9 @@ def render_multiple_time_series_plot(
             plottype=plottype,
             tags=tags,
             tagstype=tagstype,
-            setgradientcolors=setgradientcolors
+            colormap=colormap,
+            setgradientcolors=setgradientcolors,
+            render_one_plot=render_one_plot
         )
     if backend == "bokeh":
         from servis.time_series_bokeh import create_bokeh_plot
@@ -414,5 +433,7 @@ def render_multiple_time_series_plot(
             plottype=plottype,
             tags=tags,
             tagstype=tagstype,
-            setgradientcolors=setgradientcolors
+            colormap=colormap,
+            setgradientcolors=setgradientcolors,
+            render_one_plot=render_one_plot
         )
