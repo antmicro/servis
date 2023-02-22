@@ -1,6 +1,8 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 from pathlib import Path
 from matplotlib import rcParams, pyplot as plt
+
+from servis.utils import validate_colormap
 
 rcParams['font.sans-serif'] = 'lato'
 
@@ -17,6 +19,7 @@ def create_multiple_matplotlib_plot(
         outpath: Optional[Path] = None,
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
+        colormap: Optional[Union[List, str]] = None,
         render_one_plot: bool = False):
     """
     Draws time series plot.
@@ -48,11 +51,13 @@ def create_multiple_matplotlib_plot(
         The size of the figure
     bins : int
         Number of bins for value histograms
+    colormap : Optional[Union[List, str]]
+        List with colors (in form of sring with hashes or tuple with floats)
+        or name of colormap defined in matplotlib or bokeh
     render_one_plot : bool
         Use one plot to render all data, or split to one subplot for each
         set of data
     """
-    # TODO: colorschemes
 
     if render_one_plot:
         plotsnumber = 1
@@ -61,6 +66,9 @@ def create_multiple_matplotlib_plot(
         ), "Multiple axis not supported, when rendering on only one plot"
     else:
         plotsnumber = len(ydatas)
+
+    plot_colors = validate_colormap(colormap, 'matplotlib', len(ydatas))
+    hist_colors = validate_colormap(colormap, 'matplotlib', len(ydatas))
 
     fig, axs = plt.subplots(
         ncols=2,
@@ -74,11 +82,12 @@ def create_multiple_matplotlib_plot(
 
     if plotsnumber == 1:
         axplot = axs[0]
-        for ydata, xdata in zip(ydatas, xdatas):
-            axplot.scatter(xdata, ydata, alpha=0.5)
+        for ydata, xdata, color in zip(ydatas, xdatas, plot_colors):
+            axplot.scatter(xdata, ydata, alpha=0.5, c=color)
     else:
-        for ydata, xdata, axplot in zip(ydatas, xdatas, axs[:, 0]):
-            axplot.scatter(xdata, ydata, c='#E74A3C', alpha=0.5)
+        for ydata, xdata, axplot, color in zip(
+                ydatas, xdatas, axs[:, 0], plot_colors):
+            axplot.scatter(xdata, ydata, c=color, alpha=0.5)
 
     if render_one_plot and subtitles is not None:
         axplot.legend(subtitles)
@@ -109,9 +118,12 @@ def create_multiple_matplotlib_plot(
         axhist = axs[1]
         y_min = min([min(ydata) for ydata in ydatas])
         y_max = max([max(ydata) for ydata in ydatas])
-        # for ydata in ydatas:
+        if len(ydatas) == 1:
+            hist_colors = next(hist_colors)
+        else:
+            hist_colors = list(hist_colors)[:len(ydatas)]
         axhist.hist(ydatas, bins=bins, orientation='horizontal',
-                    range=(y_min, y_max))
+                    range=(y_min, y_max), color=hist_colors)
         axhist.set_xscale('log')
         axhist.set_xlabel('Value histogram', fontsize='large')
         axhist.grid(which='both')
@@ -127,9 +139,9 @@ def create_multiple_matplotlib_plot(
         for axplot in axs[:, 0]:
             axplot.grid()
 
-        for ydata, axhist in zip(ydatas, axs[:, 1]):
+        for ydata, axhist, color in zip(ydatas, axs[:, 1], hist_colors):
             axhist.hist(ydata, bins=bins,
-                        orientation='horizontal', color='#E74A3C')
+                        orientation='horizontal', color=color)
             axhist.set_xscale('log')
             axhist.set_xlabel('Value histogram', fontsize='large')
             axhist.grid(which='both')
@@ -139,6 +151,7 @@ def create_multiple_matplotlib_plot(
         plt.show()
     else:
         plt.savefig(outpath)
+    plt.close()
 
 
 def create_matplotlib_plot(
@@ -151,7 +164,8 @@ def create_matplotlib_plot(
         yunit: str,
         outpath: Optional[Path] = None,
         figsize: Tuple = (15, 8.5),
-        bins: int = 20):
+        bins: int = 20,
+        colormap: Optional[Union[List, str]] = None):
     """
     Draws time series plot.
 
@@ -180,6 +194,9 @@ def create_matplotlib_plot(
         The size of the figure
     bins : int
         Number of bins for value histograms
+    colormap : Optional[Union[List, str]]
+        List with colors (in form of sring with hashes or tuple with floats)
+        or name of colormap defined in matplotlib or bokeh
     """
 
     create_multiple_matplotlib_plot(
@@ -193,5 +210,6 @@ def create_matplotlib_plot(
         [yunit],
         outpath,
         figsize,
-        bins
+        bins,
+        colormap
     )
