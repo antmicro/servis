@@ -1,6 +1,8 @@
 from typing import List, Dict, Tuple, Optional, Iterator, Union
-from bokeh.plotting import output_file, show, save, figure as bkfigure, Figure
-from bokeh.models import Range1d, ColumnDataSource, Span, LabelSet, Div
+from bokeh.plotting import (
+    output_file, show, save, figure as bkfigure, Figure, column
+)
+from bokeh.models import Range1d, ColumnDataSource, Span, LabelSet, Div, Legend
 from numpy import histogram, float_
 from bokeh.io import export_png, export_svg
 from pathlib import Path
@@ -11,6 +13,7 @@ from servis.utils import validate_colormap, DEFAULT_COLOR
 
 BETWEEN_SECTION_MARGIN_PERCENT = 0.1
 BETWEEN_BAR_MARGIN_PERCENT = 0.
+LEGEND_COLUMNS = 3
 
 
 def get_colors(data: List):
@@ -256,7 +259,10 @@ def time_series_plot(
     Returns
     -------
     plot : bkfigure
-        Returns time series plot
+        Returns time series plot's figure
+    glyph :
+        Glyph containing reference to scatter or bar plot, which can be
+        connected with legend entry
     """
     assert plottype in ['scatter', 'bar']
 
@@ -321,18 +327,19 @@ def time_series_plot(
     if title is None:
         title = ""
     if plottype == 'bar':
-        plot.quad(top=ydata[:-1],
-                  bottom=0,
-                  left=xdata[:-1],
-                  right=xdata[1:],
-                  fill_color=data_colors,
-                  line_color=data_colors,
-                  legend_label=title)
+        glyph = plot.quad(top=ydata[:-1],
+                          bottom=0,
+                          left=xdata[:-1],
+                          right=xdata[1:],
+                          fill_color=data_colors,
+                          line_color=data_colors,
+                          legend_label=title)
     elif plottype == 'scatter':
-        plot.scatter(x=xdata, y=ydata, size=6, alpha=0.5, line_color=None,
-                     color=data_colors, legend_label=title)
+        glyph = plot.scatter(x=xdata, y=ydata, size=6,
+                             alpha=0.5, line_color=None,
+                             color=data_colors, legend_label=title)
 
-    return plot
+    return plot, glyph
 
 
 def value_histogram(
@@ -377,7 +384,10 @@ def value_histogram(
     Returns
     -------
     plot : bkfigure
-        the histogram with logarithmic scale on x-axis
+        Returns histogram plot's figure with logarithmic scale
+    glyph :
+        Glyph containing reference to histogram plot, which can be
+        connected with legend entry
     """
 
     if figure is None:
@@ -419,11 +429,11 @@ def value_histogram(
         bar_margin = bar_width*BETWEEN_BAR_MARGIN_PERCENT
         bottoms = [e+margin+data_id*bar_width+bar_margin for e in edges[:-1]]
         tops = [b+bar_width-2*bar_margin for b in bottoms]
-    plot.quad(top=tops, bottom=bottoms,
-              right=hist, left=0.00001, alpha=1,
-              fill_color=data_colors, line_color=data_colors)
+    glyph = plot.quad(top=tops, bottom=bottoms,
+                      right=hist, left=0.00001, alpha=1,
+                      fill_color=data_colors, line_color=data_colors)
 
-    return plot
+    return plot, glyph
 
 
 def add_font_url_to_html(filename: Path):
@@ -478,7 +488,7 @@ def create_bokeh_plot(
         tagstype: str = "single",
         colormap: Optional[Union[List, str]] = None,
         setgradientcolors: bool = False,
-        render_on_plot: bool = False):
+        render_one_plot: bool = False):
     """
     Draws and saves time series plot using Bokeh
 
@@ -538,12 +548,12 @@ def create_bokeh_plot(
         set of data
     """
     assert not (setgradientcolors and colormap is not None), (
-        "Setgradient and colormap cannot be used at the same time")
+        "setgradientcolors and colormap cannot be used at the same time")
 
     ts_plots = []
     val_histograms = []
 
-    if render_on_plot:
+    if render_one_plot:
         plotsnumber = 1
     else:
         plotsnumber = len(ydatas)
@@ -564,15 +574,17 @@ def create_bokeh_plot(
     plot_colors = validate_colormap(colormap, 'bokeh', len(ydatas))
     hist_colors = validate_colormap(colormap, 'bokeh', len(ydatas))
 
-    if render_on_plot:
+    legend_data = None
+    if render_one_plot:
         plot, hist = None, None
         hist_range = (
             min([min(ydata) for ydata in ydatas]),
             max([max(ydata) for ydata in ydatas])
         )
+        legend_data = []
         for i, (xdata, ydata, subtitle) in enumerate(
                 zip(xdatas, ydatas, subtitles)):
-            plot = time_series_plot(
+            plot, points = time_series_plot(
                 ydata,
                 xdata,
                 subtitle,
@@ -591,7 +603,7 @@ def create_bokeh_plot(
                 plottype=plottype,
                 figure=plot
             )
-            hist = value_histogram(
+            hist, bars = value_histogram(
                 list(float_(ydata)),
                 plot.y_range,
                 figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
@@ -603,7 +615,9 @@ def create_bokeh_plot(
                 data_len=len(ydatas),
                 figure=hist
             )
+            legend_data.append((subtitle, [points, bars]))
         plot.title.visible = False
+        plot.legend.visible = False
         ts_plots = [plot]
         val_histograms = [hist]
     else:
@@ -629,7 +643,7 @@ def create_bokeh_plot(
                 tagstype=tagstype,
                 setgradientcolors=setgradientcolors,
                 plottype=plottype
-            ))
+            )[0])
             ts_plots[-1].legend.visible = False
 
             val_histograms.append(value_histogram(
@@ -640,7 +654,7 @@ def create_bokeh_plot(
                 bins=bins,
                 colors=hist_colors,
                 setgradientcolors=setgradientcolors
-            ))
+            )[0])
 
     if title:
         div = Div(
@@ -657,8 +671,36 @@ def create_bokeh_plot(
     for ts_plot, val_hist in zip(ts_plots, val_histograms):
         plots.append([ts_plot, val_hist])
 
-    multiple_plot = gridplot(plots, merge_tools=True, toolbar_location='right',
-                             toolbar_options={'logo': None})
+    multiple_plot = gridplot(
+        plots, merge_tools=True, toolbar_location='above',
+        toolbar_options={'logo': None},
+    )
+
+    if legend_data is not None:
+        # Creating fake figure for legend
+        legend_fig = bkfigure(
+            min_border_left=plots[-1][0].width//5,
+            frame_width=0,
+            frame_height=11*len(legend_data),
+            toolbar_location=None)
+        # Creating few columns with legends
+        legends = []
+        for offset in range(LEGEND_COLUMNS):
+            legends.append(
+                Legend(items=legend_data[offset::LEGEND_COLUMNS],
+                       orientation='vertical',
+                       location='center',
+                       click_policy='hide')
+            )
+
+        legend_fig.xaxis.visible = False
+        legend_fig.yaxis.visible = False
+        legend_fig.renderers += (
+            [legend_item[1][0] for legend_item in legend_data] +
+            [legend_item[1][1] for legend_item in legend_data])
+        [legend_fig.add_layout(legend, place='right') for legend in legends]
+        multiple_plot = column(multiple_plot, legend_fig)
+
     if outpath is None:
         show(multiple_plot)
 
@@ -672,6 +714,8 @@ def create_bokeh_plot(
     multiple_plot = gridplot(
         plots, merge_tools=True,
         toolbar_location=None)
+    if legend_data is not None:
+        multiple_plot = column(multiple_plot, legend_fig)
 
     if "png" in outputext:
         export_png(multiple_plot, filename=f"{outpath}.png")
