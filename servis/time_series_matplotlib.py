@@ -89,8 +89,14 @@ def create_multiple_matplotlib_plot(
                 ydatas, xdatas, axs[:, 0], plot_colors):
             axplot.scatter(xdata, ydata, c=color, alpha=0.5)
 
+    legend = None
     if render_one_plot and subtitles is not None:
-        axplot.legend(subtitles)
+        legend = fig.legend(
+            subtitles,
+            bbox_to_anchor=[.5, 0.],
+            ncols=3,
+            loc="upper center"
+        )
     elif subtitles is not None:
         for subtitle in subtitles:
             axplot.set_title(subtitle)
@@ -150,7 +156,9 @@ def create_multiple_matplotlib_plot(
     if outpath is None:
         plt.show()
     else:
-        plt.savefig(outpath)
+        plt.savefig(outpath,
+                    bbox_extra_artists=(legend,) if legend else None,
+                    bbox_inches='tight')
     plt.close()
 
 
