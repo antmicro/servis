@@ -248,7 +248,7 @@ def time_series_plot(
         timestamps.
     colors : Optional[Iterator[str]]
         Iteretor with colors for sets of data
-    setgradientcolors :
+    setgradientcolors : bool
         True if gradient colors instead of one color should be set.
         False otherwise.
     plottype : str
@@ -259,7 +259,7 @@ def time_series_plot(
     Returns
     -------
     plot : bkfigure
-        Returns time series plot's figure
+        Bokeh figure with time series plot
     glyph :
         Glyph containing reference to scatter or bar plot, which can be
         connected with legend entry
@@ -384,7 +384,7 @@ def value_histogram(
     Returns
     -------
     plot : bkfigure
-        Returns histogram plot's figure with logarithmic scale
+        Bokeh figure with histogram plot with logarithmic scale
     glyph :
         Glyph containing reference to histogram plot, which can be
         connected with legend entry
@@ -469,8 +469,8 @@ def add_font_url_to_html(filename: Path):
 
 
 def create_bokeh_plot(
-        ydatas: List[List],
-        xdatas: List[List],
+        ydatas: List[List[List]],
+        xdatas: List[List[List]],
         title: Optional[str],
         subtitles: Optional[List[str]],
         xtitles: Optional[List[str]],
@@ -489,16 +489,16 @@ def create_bokeh_plot(
         tagstype: str = "single",
         colormap: Optional[Union[List, str]] = None,
         setgradientcolors: bool = False,
-        render_one_plot: bool = False):
+        legend_labels: List[str] = []):
     """
     Draws and saves time series plot using Bokeh
 
     Parameters
     ----------
-    ydatas : List[List]
-        The list of lists of values for Y dimension for every plot
-    xdatas : List[List]
-        The list of lists of values for X dimension for every plot
+    ydatas : List[List[List]]
+        The list of lists of lists with values for Y dimension for every plot
+    xdatas : List[List[List]]
+        The list of lists of lists with values for X dimension for every plot
     title : Optional[List[str]]
         Title of the plot
     subtitles : Optional[List[str]]
@@ -541,12 +541,11 @@ def create_bokeh_plot(
     colormap : Optional[Union[List, str]]
         List with colors (in form of sring with hashes or tuple with floats)
         or name of colormap defined in matplotlib or bokeh
-    setgradientcolors :
+    setgradientcolors : bool
         True if gradient colors instead of one color should be set.
         False otherwise.
-    render_one_plot : bool
-        Use one plot to render all data, or split to one subplot for each
-        set of data
+    legend_labels : List[str]
+        List with names used as labels in legend
     """
     assert not (setgradientcolors and colormap is not None), (
         "setgradientcolors and colormap cannot be used at the same time")
@@ -554,79 +553,37 @@ def create_bokeh_plot(
     ts_plots = []
     val_histograms = []
 
-    if render_one_plot:
-        plotsnumber = 1
-    else:
-        plotsnumber = len(ydatas)
+    figsnumber = len(ydatas)
+    plotsnumbers = sum([len(sub_ydatas) for sub_ydatas in ydatas])
 
     if xtitles is None:
-        xtitles = [None for _ in range(plotsnumber)]
+        xtitles = [None for _ in range(figsnumber)]
     if xunits is None:
-        xunits = [None for _ in range(plotsnumber)]
+        xunits = [None for _ in range(figsnumber)]
     if ytitles is None:
-        ytitles = [None for _ in range(plotsnumber)]
+        ytitles = [None for _ in range(figsnumber)]
     if yunits is None:
-        yunits = [None for _ in range(plotsnumber)]
+        yunits = [None for _ in range(figsnumber)]
     if len(trimxvaluesoffsets) == 0:
-        trimxvaluesoffsets = [0 for i in range(plotsnumber)]
+        trimxvaluesoffsets = [0 for i in range(figsnumber)]
     if len(tags) == 0:
-        tags = [[] for i in range(plotsnumber)]
+        tags = [[] for i in range(figsnumber)]
 
-    plot_colors = validate_colormap(colormap, 'bokeh', len(ydatas))
-    hist_colors = validate_colormap(colormap, 'bokeh', len(ydatas))
+    plot_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
+    hist_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
 
-    legend_data = None
-    if render_one_plot:
+    legend_data = []
+    for (sub_ydatas, sub_xdatas, subtitle, ytitle, yunit, xtitle, xunit,
+         trimxvaluesoffset, tag, y_range, x_range) in zip(
+        ydatas, xdatas, subtitles, ytitles, yunits, xtitles, xunits,
+            trimxvaluesoffsets, tags, y_ranges, x_ranges):
         plot, hist = None, None
         hist_range = (
-            min([min(ydata) for ydata in ydatas]),
-            max([max(ydata) for ydata in ydatas])
+            min([min(ydata) for ydata in sub_ydatas]),
+            max([max(ydata) for ydata in sub_ydatas])
         )
-        legend_data = []
-        for i, (xdata, ydata, subtitle) in enumerate(
-                zip(xdatas, ydatas, subtitles)):
+        for i, (ydata, xdata) in enumerate(zip(sub_ydatas, sub_xdatas)):
             plot, points = time_series_plot(
-                ydata,
-                xdata,
-                subtitle,
-                xtitles[0],
-                xunits[0],
-                ytitles[0],
-                yunits[0],
-                x_ranges[0],
-                y_ranges[0],
-                trimxvaluesoffsets[0],
-                colors=plot_colors,
-                figsize=(figsize[0] * 8/11, figsize[1] // plotsnumber),
-                tags=tags[0],
-                tagstype=tagstype,
-                setgradientcolors=setgradientcolors,
-                plottype=plottype,
-                figure=plot
-            )
-            hist, bars = value_histogram(
-                list(float_(ydata)),
-                plot.y_range,
-                figsize=(figsize[0] * 3/11, figsize[1] // plotsnumber),
-                bins=bins,
-                colors=hist_colors,
-                setgradientcolors=setgradientcolors,
-                histogram_range=hist_range,
-                data_id=i,
-                data_len=len(ydatas),
-                figure=hist
-            )
-            legend_data.append((subtitle, [points, bars]))
-        plot.title.visible = False
-        plot.legend.visible = False
-        ts_plots = [plot]
-        val_histograms = [hist]
-    else:
-        for subtitle, xtitle, xunit, ytitle, yunit, xdata, ydata, \
-                trimxvaluesoffset, tags_for_one_plot, x_range, y_range in \
-                zip(subtitles, xtitles, xunits, ytitles, yunits, xdatas,
-                    ydatas, trimxvaluesoffsets, tags, x_ranges, y_ranges):
-            ts_plots.append(time_series_plot(
                 ydata,
                 xdata,
                 subtitle,
@@ -636,26 +593,34 @@ def create_bokeh_plot(
                 yunit,
                 x_range,
                 y_range,
+                trimxvaluesoffset,
                 colors=plot_colors,
-                trimxvaluesoffset=trimxvaluesoffset,
-                # plots should be in a ratio of 8:3
-                figsize=(figsize[0] * 8/11, figsize[1] // plotsnumber),
-                tags=tags_for_one_plot,
+                figsize=(figsize[0] * 8/11, figsize[1] // figsnumber),
+                tags=tag,
                 tagstype=tagstype,
                 setgradientcolors=setgradientcolors,
-                plottype=plottype
-            )[0])
-            ts_plots[-1].legend.visible = False
-
-            val_histograms.append(value_histogram(
+                plottype=plottype,
+                figure=plot
+            )
+            hist, bars = value_histogram(
                 list(float_(ydata)),
-                ts_plots[-1].y_range,
-                # plots should be in a ratio of 8:3
-                figsize=(figsize[0] * 3/11, figsize[1] // plotsnumber),
+                plot.y_range,
+                figsize=(figsize[0] * 3/11, figsize[1] // figsnumber),
                 bins=bins,
                 colors=hist_colors,
-                setgradientcolors=setgradientcolors
-            )[0])
+                setgradientcolors=setgradientcolors,
+                histogram_range=hist_range,
+                data_id=i,
+                data_len=len(sub_ydatas),
+                figure=hist
+            )
+
+            legend_data.append([points, bars])
+            # plot.title.visible = False
+            plot.legend.visible = False
+
+        ts_plots.append(plot)
+        val_histograms.append(hist)
 
     if title:
         div = Div(
@@ -677,7 +642,9 @@ def create_bokeh_plot(
         toolbar_options={'logo': None},
     )
 
-    if legend_data is not None:
+    if len(legend_labels) > 0:
+        legend_data = [(label, data)
+                       for label, data in zip(legend_labels, legend_data)]
         # Creating fake figure for legend
         legend_fig = bkfigure(
             min_border_left=plots[-1][0].width // 5,
@@ -715,7 +682,7 @@ def create_bokeh_plot(
     multiple_plot = gridplot(
         plots, merge_tools=True,
         toolbar_location=None)
-    if legend_data is not None:
+    if len(legend_labels) > 1:
         multiple_plot = column(multiple_plot, legend_fig)
 
     if "png" in outputext:
