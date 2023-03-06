@@ -3,7 +3,7 @@ Functions to creating and rendering time series plots in various formats
 """
 
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional, Union
+from typing import List, Dict, Tuple, Optional, Union, Iterable
 
 
 def render_time_series_plot_with_histogram(
@@ -73,7 +73,7 @@ def render_time_series_plot_with_histogram(
         The size of the figure
     bins : int
         Number of bins for value histograms
-    is_x_timestamp :
+    is_x_timestamp : bool
         Used in txt plot.
         True if x should be a timestamp,
         False if x should be converted to datetime
@@ -91,128 +91,42 @@ def render_time_series_plot_with_histogram(
     colormap : Optional[Union[List, str]]
         List with colors (in form of sring with hashes or tuple with floats)
         or name of colormap defined in matplotlib or bokeh
-    setgradientcolors :
+    setgradientcolors : bool
         True if gradient colors instead of one color should be set
         in plot rendered using Bokeh.
         False otherwise.
     """
-    assert backend in ['bokeh', 'matplotlib', 'plotext']
 
-    if xdata is None:
-        xdata = [i for i in range(len(ydata))]
-    start = 1 if skipfirst else 0
-    xdata = xdata[start:]
-    ydata = ydata[start:]
-
-    offset = 0
-    if trimxvalues:
-        offset = min(xdata)
-        xdata = [x - offset for x in xdata]
-
-    if "txt" in outputext:
-        from servis.time_series_plotext import render_ascii_plot
-
-        render_ascii_plot(
-            [ydata],
-            [xdata],
-            titles=[title],
-            xtitles=[xtitle],
-            xunits=[xunit],
-            ytitles=[ytitle],
-            yunits=[yunit],
-            x_ranges=[x_range],
-            y_ranges=[y_range],
-            outpath=f'{outpath}.ascii',
-            figsize=figsize,
-            is_x_timestamp=is_x_timestamp,
-            plottype=plottype
-        )
-
-    if "png" in outputext and backend == "matplotlib":
-        from servis.time_series_matplotlib import create_matplotlib_plot
-        create_matplotlib_plot(
-            ydata,
-            xdata,
-            title=title,
-            xtitle=xtitle,
-            xunit=xunit,
-            ytitle=ytitle,
-            yunit=yunit,
-            outpath=f'{outpath}.png',
-            figsize=(figsize[0] / 100, figsize[1] / 100),
-            bins=bins,
-            colormap=colormap,
-        )
-
-    if "svg" in outputext and backend == "matplotlib":
-        from servis.time_series_matplotlib import create_matplotlib_plot
-        create_matplotlib_plot(
-            ydata,
-            xdata,
-            title=title,
-            xtitle=xtitle,
-            xunit=xunit,
-            ytitle=ytitle,
-            yunit=yunit,
-            outpath=f'{outpath}.svg',
-            figsize=(figsize[0] / 100, figsize[1] / 100),
-            bins=bins,
-            colormap=colormap,
-        )
-
-    if "html" in outputext:
-        from servis.time_series_bokeh import create_bokeh_plot
-        create_bokeh_plot(
-            ydatas=[ydata],
-            xdatas=[xdata],
-            title=None,
-            subtitles=[title],
-            xtitles=[xtitle],
-            xunits=[xunit],
-            ytitles=[ytitle],
-            yunits=[yunit],
-            x_ranges=[x_range],
-            y_ranges=[y_range],
-            outpath=outpath,
-            outputext=["html"],
-            trimxvaluesoffsets=[offset],
-            plottype=plottype,
-            figsize=figsize,
-            bins=bins,
-            tags=[tags],
-            tagstype=tagstype,
-            colormap=colormap,
-        )
-
-    if backend == "bokeh":
-        from servis.time_series_bokeh import create_bokeh_plot
-        create_bokeh_plot(
-            ydatas=[ydata],
-            xdatas=[xdata],
-            title=None,
-            subtitles=[title],
-            xtitles=[xtitle],
-            xunits=[xunit],
-            ytitles=[ytitle],
-            yunits=[yunit],
-            x_ranges=[x_range],
-            y_ranges=[y_range],
-            outpath=outpath,
-            outputext=outputext,
-            trimxvaluesoffsets=[offset],
-            plottype=plottype,
-            figsize=figsize,
-            bins=bins,
-            tags=[tags],
-            tagstype=tagstype,
-            colormap=colormap,
-            setgradientcolors=setgradientcolors
-        )
+    render_multiple_time_series_plot(
+        ydata,
+        xdata,
+        title,
+        None,
+        [xtitle] if xtitle else None,
+        [xunit] if xunit else None,
+        [ytitle] if ytitle else None,
+        [yunit] if yunit else None,
+        [x_range] if x_range else None,
+        [y_range] if y_range else None,
+        outpath,
+        outputext,
+        trimxvalues,
+        skipfirst,
+        figsize,
+        bins,
+        is_x_timestamp,
+        plottype,
+        [tags] if len(tags) > 0 else [],
+        tagstype,
+        backend,
+        colormap,
+        setgradientcolors,
+    )
 
 
 def render_multiple_time_series_plot(
-        ydatas: List[List],
-        xdatas: List[List],
+        ydatas: Union[List, List[List], List[List[List]]],
+        xdatas: Union[List, List[List], List[List[List]]],
         title: str,
         subtitles: List[str],
         xtitles: List[str],
@@ -234,7 +148,7 @@ def render_multiple_time_series_plot(
         backend: str = "plotext",
         colormap: Optional[List] = None,
         setgradientcolors: bool = False,
-        render_one_plot: bool = False):
+        legend_labels: List[str] = []):
     """
     Draws multiple time series plot.
 
@@ -245,10 +159,18 @@ def render_multiple_time_series_plot(
 
     Parameters
     ----------
-    ydatas : List[List]
-        The list of list of values for Y dimension for every plot
-    xdatas : List[List]
-        The list of list of values for X dimension for every plot
+    ydatas : List | List[List] | List[List[List]]
+        Data with values of Y dimension for every plot.
+        If data is in List format:
+        - only one plot will be generated
+        If data is in List[List] format:
+        - one figure (with one plot) will be generated for each sub-list
+        If data is in List[List[List]] format:
+        - one figure will be generated for each sub-list and this figure will
+          contain plots of all data from lists in sub-list
+    xdatas : List | List[List] | List[List[List]]
+        Data with values for X dimension for every plot, has to have the same
+        structure as ydatas
     title : List[str]
         Title of the plot
     subtitles : List[str]
@@ -282,7 +204,7 @@ def render_multiple_time_series_plot(
         The size of the figure
     bins : int
         Number of bins for value histograms
-    is_x_timestamp :
+    is_x_timestamp : bool
         Used in txt plot.
         True if x should be a timestamp,
         False if x should be converted to datetime
@@ -297,45 +219,65 @@ def render_multiple_time_series_plot(
     backend : str
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
-    setgradientcolors :
+    colormap : Optional[Union[List, str]]
+        List with colors (in form of sring with hashes or tuple with floats)
+        or name of colormap defined in matplotlib or bokeh
+    setgradientcolors : bool
         True if gradient colors instead of one color should be set
         in plot rendered using Bokeh.
         False otherwise.
-    render_one_plot : bool
-        Use one plot to render all data, or split to one subplot for each
-        set of data
+    legend_labels : List[str]
+        List with names used as labels in legend
     """
     assert backend in ['bokeh', 'matplotlib', 'plotext']
 
+    # List -> List[List]
+    if not isinstance(xdatas[0], (List, Tuple, Iterable)):
+        xdatas = [xdatas]
+        ydatas = [ydatas]
+
+    # List[List] -> List[List[List]]
+    if not isinstance(xdatas[0][0], (List, Tuple, Iterable)):
+        for i, (xdata, ydata) in enumerate(zip(xdatas, ydatas)):
+            xdatas[i] = [xdata]
+            ydatas[i] = [ydata]
+
+    # Fill xdatas with default values (from 0 to n) in shape of ydatas
     if xdatas is None:
-        xdatas = [list(range(len(ydatas[0]))) for _ in range(len(ydatas))]
+        xdatas = []
+        for sub_ydatas in ydatas:
+            xdatas.append([list(range(len(ydata))) for ydata in sub_ydatas])
 
+    # Skip first
     start = 1 if skipfirst else 0
+    for sub_xdatas, sub_ydatas in zip(xdatas, ydatas):
+        for i, (xdata, ydata) in enumerate(zip(sub_xdatas, sub_ydatas)):
+            sub_xdatas[i] = xdata[start:]
+            sub_ydatas[i] = ydata[start:]
 
-    for xdata in xdatas:
-        xdata = xdata[start:]
-
-    for ydata in ydatas:
-        ydata = ydata[start:]
-
+    # Trim values, so they begin at 0
     offsets = []
     if trimxvalues:
-        for xdata in xdatas:
-            minx = min(xdata)
-            xdata = [x - minx for x in xdata]
-            offsets.append(minx)
+        for sub_xdatas in xdatas:
+            for i, xdata in enumerate(sub_xdatas):
+                minx = min(xdata)
+                sub_xdatas[i] = [x - minx for x in xdata]
+                offsets.append(minx)
 
+    # Default values for ranges and subtitles
     if y_ranges is None:
         y_ranges = [None for _ in range(len(ydatas))]
     if x_ranges is None:
         x_ranges = [None for _ in range(len(ydatas))]
+    if subtitles is None:
+        subtitles = [None for _ in ydatas]
 
     if "txt" in outputext:
         from servis.time_series_plotext import render_ascii_plot
 
         render_ascii_plot(
-            ydatas=ydatas,
-            xdatas=xdatas,
+            ydatas=ydatas[0],
+            xdatas=xdatas[0],
             titles=subtitles,
             xtitles=xtitles,
             xunits=xunits,
@@ -365,7 +307,7 @@ def render_multiple_time_series_plot(
             figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
-            render_one_plot=render_one_plot
+            legend_labels=legend_labels,
         )
 
     if "svg" in outputext and backend == "matplotlib":
@@ -384,7 +326,7 @@ def render_multiple_time_series_plot(
             figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
-            render_one_plot=render_one_plot
+            legend_labels=legend_labels,
         )
 
     if "html" in outputext:
@@ -410,7 +352,7 @@ def render_multiple_time_series_plot(
             tagstype=tagstype,
             colormap=colormap,
             setgradientcolors=setgradientcolors,
-            render_one_plot=render_one_plot
+            legend_labels=legend_labels,
         )
     if backend == "bokeh":
         from servis.time_series_bokeh import create_bokeh_plot
@@ -435,5 +377,5 @@ def render_multiple_time_series_plot(
             tagstype=tagstype,
             colormap=colormap,
             setgradientcolors=setgradientcolors,
-            render_one_plot=render_one_plot
+            legend_labels=legend_labels,
         )
