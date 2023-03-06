@@ -63,7 +63,7 @@ def get_colors(data: List):
     for d in data:
         # there are 20 colors and the values are between 0 and 100,
         # so it has to be divided by 5 to create 20 ranges
-        data_colors.append(colors[round(float(d))//5])
+        data_colors.append(colors[round(float(d)) // 5])
     return data_colors
 
 
@@ -107,7 +107,7 @@ def add_tags(
         for t in tags:
             trimmed_tagstimestamps.append({
                 'name': t['name'],
-                'timestamp': t['timestamp']+trimxvaluesoffset})
+                'timestamp': t['timestamp'] + trimxvaluesoffset})
         tags = trimmed_tagstimestamps
 
         for t in tags:
@@ -121,14 +121,14 @@ def add_tags(
         # Calculating the tags positions, so that they are
         # in two rows for better readability
         if yrange is None:
-            first_row = (max_y_value-min_y_value)*0.96 + min_y_value
-            second_row = (max_y_value-min_y_value)*0.9 + min_y_value
+            first_row = (max_y_value - min_y_value) * 0.96 + min_y_value
+            second_row = (max_y_value - min_y_value) * 0.9 + min_y_value
         else:
-            first_row = (yrange[1]-yrange[0])*0.96 + yrange[0]
-            second_row = (yrange[1]-yrange[0])*0.9 + yrange[0]
+            first_row = (yrange[1] - yrange[0]) * 0.96 + yrange[0]
+            second_row = (yrange[1] - yrange[0]) * 0.9 + yrange[0]
 
         tags_ylocations = [second_row, first_row] * \
-            (int(len(tags)/2)) + [second_row]*(len(tags) % 2)
+            (int(len(tags) / 2)) + [second_row] * (len(tags) % 2)
 
         source = ColumnDataSource(data={"timestamps": [tag["timestamp"]
                                                        for tag in tags],
@@ -145,8 +145,8 @@ def add_tags(
         for t in tags:
             trimmed_tagstimestamps.append({
                 'name': t['name'],
-                'start': t['start']+trimxvaluesoffset,
-                'end': t['end']+trimxvaluesoffset})
+                'start': t['start'] + trimxvaluesoffset,
+                'end': t['end'] + trimxvaluesoffset})
             tags = trimmed_tagstimestamps
 
         tags_names = list()
@@ -174,12 +174,12 @@ def add_tags(
             widths[tn] = list()
 
         for t in tags:
-            xdatatags[t['name']].append((t['start']+t['end'])/2)
-            widths[t['name']].append(t['start']-t['end'])
+            xdatatags[t['name']].append((t['start'] + t['end']) / 2)
+            widths[t['name']].append(t['start'] - t['end'])
 
         for t in tags_names:
-            plot.rect(x=xdatatags[t], y=(min_y_value+max_y_value)/2,
-                      height=(max_y_value-min_y_value), width=widths[t],
+            plot.rect(x=xdatatags[t], y=(min_y_value + max_y_value) / 2,
+                      height=(max_y_value - min_y_value), width=widths[t],
                       color=tags_colors[t], alpha=0.2,
                       muted_color=tags_colors[t], muted_alpha=0,
                       legend_label=t)
@@ -318,7 +318,7 @@ def time_series_plot(
                         yrange=y_range)
 
     if setgradientcolors is True:
-        data_colors = get_colors(ydata[0:-1])
+        data_colors = get_colors(ydata[:-1])
     elif colors is not None:
         data_colors = next(colors)
     else:
@@ -423,12 +423,13 @@ def value_histogram(
         tops = edges[1:]
         bottoms = edges[:-1]
     else:
-        space_between = edges[1]-edges[0]
-        margin = space_between*BETWEEN_SECTION_MARGIN_PERCENT
-        bar_width = (space_between-2*margin)/data_len
-        bar_margin = bar_width*BETWEEN_BAR_MARGIN_PERCENT
-        bottoms = [e+margin+data_id*bar_width+bar_margin for e in edges[:-1]]
-        tops = [b+bar_width-2*bar_margin for b in bottoms]
+        space_between = edges[1] - edges[0]
+        margin = space_between * BETWEEN_SECTION_MARGIN_PERCENT
+        bar_width = (space_between - 2*margin) / data_len
+        bar_margin = bar_width * BETWEEN_BAR_MARGIN_PERCENT
+        bottoms = [e + margin + data_id *
+                   bar_width + bar_margin for e in edges[:-1]]
+        tops = [b + bar_width - 2*bar_margin for b in bottoms]
     glyph = plot.quad(top=tops, bottom=bottoms,
                       right=hist, left=0.00001, alpha=1,
                       fill_color=data_colors, line_color=data_colors)
@@ -460,7 +461,7 @@ def add_font_url_to_html(filename: Path):
     if head_location is None:
         raise Exception("Head not found in HTML file")
 
-    content.insert(head_location+1, font_line)
+    content.insert(head_location + 1, font_line)
 
     with open(filename, 'w') as file:
         content = "".join(content)
@@ -596,7 +597,7 @@ def create_bokeh_plot(
                 y_ranges[0],
                 trimxvaluesoffsets[0],
                 colors=plot_colors,
-                figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
+                figsize=(figsize[0] * 8/11, figsize[1] // plotsnumber),
                 tags=tags[0],
                 tagstype=tagstype,
                 setgradientcolors=setgradientcolors,
@@ -606,7 +607,7 @@ def create_bokeh_plot(
             hist, bars = value_histogram(
                 list(float_(ydata)),
                 plot.y_range,
-                figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
+                figsize=(figsize[0] * 3/11, figsize[1] // plotsnumber),
                 bins=bins,
                 colors=hist_colors,
                 setgradientcolors=setgradientcolors,
@@ -638,7 +639,7 @@ def create_bokeh_plot(
                 colors=plot_colors,
                 trimxvaluesoffset=trimxvaluesoffset,
                 # plots should be in a ratio of 8:3
-                figsize=(figsize[0]*8/11, figsize[1]//plotsnumber),
+                figsize=(figsize[0] * 8/11, figsize[1] // plotsnumber),
                 tags=tags_for_one_plot,
                 tagstype=tagstype,
                 setgradientcolors=setgradientcolors,
@@ -650,7 +651,7 @@ def create_bokeh_plot(
                 list(float_(ydata)),
                 ts_plots[-1].y_range,
                 # plots should be in a ratio of 8:3
-                figsize=(figsize[0]*3/11, figsize[1]//plotsnumber),
+                figsize=(figsize[0] * 3/11, figsize[1] // plotsnumber),
                 bins=bins,
                 colors=hist_colors,
                 setgradientcolors=setgradientcolors
@@ -679,7 +680,7 @@ def create_bokeh_plot(
     if legend_data is not None:
         # Creating fake figure for legend
         legend_fig = bkfigure(
-            min_border_left=plots[-1][0].width//5,
+            min_border_left=plots[-1][0].width // 5,
             frame_width=0,
             frame_height=11*len(legend_data),
             toolbar_location=None)

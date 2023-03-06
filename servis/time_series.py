@@ -139,7 +139,7 @@ def render_time_series_plot_with_histogram(
             ytitle=ytitle,
             yunit=yunit,
             outpath=f'{outpath}.png',
-            figsize=(figsize[0]/100, figsize[1]/100),
+            figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
         )
@@ -155,7 +155,7 @@ def render_time_series_plot_with_histogram(
             ytitle=ytitle,
             yunit=yunit,
             outpath=f'{outpath}.svg',
-            figsize=(figsize[0]/100, figsize[1]/100),
+            figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
         )
@@ -362,7 +362,7 @@ def render_multiple_time_series_plot(
             ytitles,
             yunits,
             f'{outpath}.png',
-            figsize=(figsize[0]/100, figsize[1]/100),
+            figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
             render_one_plot=render_one_plot
@@ -381,7 +381,7 @@ def render_multiple_time_series_plot(
             ytitles,
             yunits,
             f'{outpath}.svg',
-            figsize=(figsize[0]/100, figsize[1]/100),
+            figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
             render_one_plot=render_one_plot

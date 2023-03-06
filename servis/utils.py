@@ -44,7 +44,7 @@ def get_color_iterator(name: str, quantity: int = 3):
     try:
         from matplotlib import colormaps
         return iter(colormaps[name](
-            list(map(lambda x: x/quantity, range(0, quantity)))))
+            list(map(lambda x: x / quantity, range(0, quantity)))))
     except Exception:
         pass
     raise ColorMapNotFound(name, quantity)
@@ -67,7 +67,7 @@ def _to_matplotlib(value: Union[str, Iterable]) -> Iterable:
     if isinstance(value, str):
         t = []
         for i in range(1, 7, 2):
-            t.append(int(value[i:i+2], 16)/255)
+            t.append(int(value[i:i + 2], 16) / 255)
         return tuple(t)
     return value
 
@@ -166,7 +166,7 @@ def validate_colormap(
         colors = iter([DEFAULT_COLOR])
     elif colormap is None and quantity > 1:
         colors = itertools.chain(
-            [DEFAULT_COLOR], get_colormap("Set1", quantity-1))
+            [DEFAULT_COLOR], get_colormap("Set1", quantity - 1))
     elif isinstance(colormap, str):
         colors = get_colormap_for_matplotlib(colormap, quantity)
     else:
