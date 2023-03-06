@@ -1,6 +1,7 @@
 from typing import List, Tuple, Optional, Union
 from pathlib import Path
 from matplotlib import rcParams, pyplot as plt
+import numpy as np
 
 from servis.utils import validate_colormap
 
@@ -8,8 +9,8 @@ rcParams['font.sans-serif'] = 'lato'
 
 
 def create_multiple_matplotlib_plot(
-        ydatas: List[List],
-        xdatas: List[List],
+        ydatas: List[List[List]],
+        xdatas: List[List[List]],
         title: Optional[str] = None,
         subtitles: Optional[List[str]] = None,
         xtitles: Optional[List[str]] = None,
@@ -20,7 +21,7 @@ def create_multiple_matplotlib_plot(
         figsize: Tuple = (1500, 1080),
         bins: int = 20,
         colormap: Optional[Union[List, str]] = None,
-        render_one_plot: bool = False):
+        legend_labels: List[str] = []):
     """
     Draws time series plot.
 
@@ -29,9 +30,9 @@ def create_multiple_matplotlib_plot(
 
     Parameters
     ----------
-    ydatas : List[List]
-        The list of lists of OY values for multiple series.
-    xdata : List
+    ydatas : List[List[List]]
+        The list of lists of lists with OY values for multiple series.
+    xdata : List[List[List]]
         The values for X dimension
     title : Optional[str]
         Title of the plot
@@ -54,104 +55,79 @@ def create_multiple_matplotlib_plot(
     colormap : Optional[Union[List, str]]
         List with colors (in form of sring with hashes or tuple with floats)
         or name of colormap defined in matplotlib or bokeh
-    render_one_plot : bool
-        Use one plot to render all data, or split to one subplot for each
-        set of data
+    legend_labels : List[str]
+        List with names used as labels in legend
     """
 
-    if render_one_plot:
-        plotsnumber = 1
-        assert all(
-            [len(arg) == 1 for arg in (xtitles, xunits, ytitles, yunits)]
-        ), "Multiple axis not supported, when rendering on only one plot"
-    else:
-        plotsnumber = len(ydatas)
+    figsnumber = len(ydatas)
+    plotsnumber = sum([len(sub_ydatas) for sub_ydatas in ydatas])
 
-    plot_colors = validate_colormap(colormap, 'matplotlib', len(ydatas))
-    hist_colors = validate_colormap(colormap, 'matplotlib', len(ydatas))
+    plot_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
+    hist_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
 
     fig, axs = plt.subplots(
         ncols=2,
-        nrows=plotsnumber,
+        nrows=figsnumber,
         tight_layout=True,
         figsize=figsize,
         sharey=True,
         gridspec_kw={'width_ratios': (8, 3)}
     )
     fig.suptitle(title, fontsize='x-large')
+    if figsnumber == 1:
+        axs = axs[np.newaxis, :]
 
-    if plotsnumber == 1:
-        axplot = axs[0]
-        for ydata, xdata, color in zip(ydatas, xdatas, plot_colors):
-            axplot.scatter(xdata, ydata, alpha=0.5, c=color)
-    else:
-        for ydata, xdata, axplot, color in zip(
-                ydatas, xdatas, axs[:, 0], plot_colors):
-            axplot.scatter(xdata, ydata, c=color, alpha=0.5)
+    for sub_ydatas, sub_xdatas, axplot, axhist in zip(
+            ydatas, xdatas, axs[:, 0], axs[:, 1]):
+        axplot.grid()
+        axhist.grid(which='both')
+        # Drawing points
+        for ydata, xdata in zip(sub_ydatas, sub_xdatas):
+            axplot.scatter(xdata, ydata, c=next(plot_colors), alpha=0.5)
+        # Drawing histogram
+        y_min = min([min(ydata) for ydata in sub_ydatas])
+        y_max = max([max(ydata) for ydata in sub_ydatas])
+        axhist.hist(
+            sub_ydatas, bins=bins,
+            orientation='horizontal', range=(y_min, y_max),
+            color=[next(hist_colors) for _ in sub_ydatas])
+        # Histogram settings
+        axhist.set_xscale('log')
+        axhist.set_xlabel('Value histogram', fontsize='large')
+        plt.setp(axhist.get_yticklabels(), visible=False)
 
+    # Adding legend
     legend = None
-    if render_one_plot and subtitles is not None:
+    if len(legend_labels) > 1:
         legend = fig.legend(
-            subtitles,
+            legend_labels,
             bbox_to_anchor=[.5, 0.],
             ncols=3,
             loc="upper center"
         )
-    elif subtitles is not None:
-        for subtitle in subtitles:
-            axplot.set_title(subtitle)
+    # Adding sub-titles
+    for subtitle, axplot in zip(subtitles, axs[:, 0]):
+        axplot.set_title(subtitle)
 
+    # Adding x-labels
     xlabels = None
     if xtitles:
         xlabels = xtitles
-        for i, (xunit, xlabel) in enumerate(zip(xunits, xlabels)):
+        for i, (xunit, xlabel, axplot) in enumerate(
+                zip(xunits, xlabels, axs[:, 0])):
             if xunits is not None:
-                xlabels[i] += f' [{xunit}]'
+                xlabel += f' [{xunit}]'
+            axplot.set_xlabel(xlabel, fontsize='large')
 
+    # Adding y-labels
     ylabels = None
     if ytitles:
         ylabels = ytitles
-        for i, (yunit, ylabel) in enumerate(zip(yunits, ylabels)):
+        for i, (yunit, ylabel, axplot) in enumerate(
+                zip(yunits, ylabels, axs[:, 0])):
             if yunits is not None:
-                ylabels[i] += f' [{yunit}]'
-
-    if plotsnumber == 1:
-        if xlabels:
-            axplot.set_xlabel(xlabels[0], fontsize='large')
-            axplot.set_ylabel(ylabels[0], fontsize='large')
-            axplot.grid()
-
-        axhist = axs[1]
-        y_min = min([min(ydata) for ydata in ydatas])
-        y_max = max([max(ydata) for ydata in ydatas])
-        if len(ydatas) == 1:
-            hist_colors = next(hist_colors)
-        else:
-            hist_colors = list(hist_colors)[:len(ydatas)]
-        axhist.hist(ydatas, bins=bins, orientation='horizontal',
-                    range=(y_min, y_max), color=hist_colors)
-        axhist.set_xscale('log')
-        axhist.set_xlabel('Value histogram', fontsize='large')
-        axhist.grid(which='both')
-        plt.setp(axhist.get_yticklabels(), visible=False)
-    else:
-        if xlabels:
-            for xlabel, axplot in zip(xlabels, axs[:, 0]):
-                axplot.set_xlabel(xlabel, fontsize='large')
-        if ylabels:
-            for ylabel, axplot in zip(ylabels, axs[:, 0]):
-                axplot.set_ylabel(ylabel, fontsize='large')
-
-        for axplot in axs[:, 0]:
-            axplot.grid()
-
-        for ydata, axhist, color in zip(ydatas, axs[:, 1], hist_colors):
-            axhist.hist(ydata, bins=bins,
-                        orientation='horizontal', color=color)
-            axhist.set_xscale('log')
-            axhist.set_xlabel('Value histogram', fontsize='large')
-            axhist.grid(which='both')
-            plt.setp(axhist.get_yticklabels(), visible=False)
+                ylabel += f' [{yunit}]'
+            axplot.set_ylabel(ylabel, fontsize='large')
 
     if outpath is None:
         plt.show()
@@ -208,8 +184,8 @@ def create_matplotlib_plot(
     """
 
     create_multiple_matplotlib_plot(
-        [ydata],
-        [xdata],
+        [[ydata]],
+        [[xdata]],
         title,
         None,
         [xtitle],
