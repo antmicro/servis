@@ -20,9 +20,9 @@ def _set_plot_attributes(
         x_range: Optional[Tuple] = None,
         y_range: Optional[Tuple] = None,
         figsize: Optional[Tuple] = None,
-        canvas_color=(51, 45, 55),
-        axes_color=(51, 45, 55),
-        ticks_color='white'):
+        canvas_color: Union[str, Tuple] = (51, 45, 55),
+        axes_color: Union[str, Tuple] = (51, 45, 55),
+        ticks_color: Union[str, Tuple] = 'white'):
     """
     Sets attributes (like title, axes labels or plot size) for currently
     active plot.
@@ -45,12 +45,15 @@ def _set_plot_attributes(
         The range of zoom on Y axis
     figsize : Optional[Tuple]
         The size of the figure
-    canvas_color:
-        Name of color of the plot background
-    axes_color:
-        Name of color of the background of labels surrounding plot
-    ticks_color:
-        Name of color of the axes ticks and of the grid lines
+    canvas_color : str | Tuple[int]
+        Name of color of the plot background or
+        its representation in 3 integers
+    axes_color : str | Tuple[int]
+        Name of color of the background of labels surrounding plot or
+        its representation in 3 integers
+    ticks_color : str | Tuple[int]
+        Name of color of the axes ticks and of the grid lines or
+        its representation in 3 integers
     """
     import plotext
 
@@ -119,16 +122,16 @@ def create_ascii_histogram(
         Can be 'scatter', 'bar' or 'line'
     hidden_y_ticks : bool
         Should ticks on y axis be hidden
-    canvas_color : str | Tuple
+    canvas_color : str | Tuple[int]
         Name of color of the plot background or
         its representation in 3 integers
-    axes_color : str | Tuple
+    axes_color : str | Tuple[int]
         Name of color of the background of labels surrounding plot or
         its representation in 3 integers
-    ticks_color : str | Tuple
+    ticks_color : str | Tuple[int]
         Name of color of the axes ticks and of the grid lines or
         its representation in 3 integers
-    data_colors : List[Tuple]
+    data_colors : List[Tuple[int]]
         List with colors used to plot different sets of data
     """
     import numpy as np
@@ -194,10 +197,10 @@ def create_ascii_plot(
         bins: int = 0,
         plottype: Union[str, Tuple[str]] = ('scatter', 'line'),
         is_x_timestamp: bool = True,
-        canvas_color=(51, 45, 55),
-        axes_color=(51, 45, 55),
-        ticks_color='white',
-        data_colors=[(231, 74, 60)],
+        canvas_color: Union[str, Tuple[int]] = (51, 45, 55),
+        axes_color: Union[str, Tuple[int]] = (51, 45, 55),
+        ticks_color: Union[str, Tuple[int]] = 'white',
+        data_colors: List[Tuple[int]] = [(231, 74, 60)],
         legend_labels: List[str] = []):
     """
     Draws ASCII time series plot in terminal.
@@ -226,18 +229,22 @@ def create_ascii_plot(
         The range of zoom on Y axis
     figsize : Optional[Tuple]
         The size of the figure
-    plottype : str
-        Can be 'scatter', 'bar' or 'line'
-    is_x_timestamp:
+    plottype : str | Tuple[str]
+        Type of plot or (plot, histogram). Values can be either:
+        'scatter', 'bar' or 'line'
+    is_x_timestamp : bool
         True if x should be a timestamp,
         False if x should be converted to datetime
-    canvas_color:
-        Name of color of the plot background
-    axes_color:
-        Name of color of the background of labels surrounding plot
-    ticks_color:
-        Name of color of the axes ticks and of the grid lines
-    data_colors : List[Tuple]
+    canvas_color : str | Tuple[int]
+        Name of color of the plot background or
+        its representation in 3 integers
+    axes_color : str | Tuple[int]
+        Name of color of the background of labels surrounding plot or
+        its representation in 3 integers
+    ticks_color : str | Tuple[int]
+        Name of color of the axes ticks and of the grid lines or
+        its representation in 3 integers
+    data_colors : List[Tuple[int]]
         List with colors used to plot different sets of data
     legend_labels : List[str]
         List with names used as labels in legend
@@ -336,10 +343,10 @@ def render_ascii_plot(
         x_ranges: Optional[List[Tuple]] = None,
         y_ranges: Optional[List[Tuple]] = None,
         outpath: Optional[Path] = None,
-        figsize: Tuple = None,
+        figsize: Optional[Tuple] = None,
         bins: int = 0,
         is_x_timestamp: bool = True,
-        plottype: str = 'line',
+        plottype: Union[str, Tuple[str]] = 'line',
         colormap: Optional[Union[List, str]] = None,
         legend_labels: List[str] = []):
     """
@@ -374,8 +381,14 @@ def render_ascii_plot(
     is_x_timestamp : bool
         True if x should be a timestamp,
         False if x should be converted to datetime
-    plottype : str
-        Can be 'scatter', 'bar' or 'line'
+    plottype : str | Tuple[str]
+        Type of plot or (plot, histogram). Values can be either:
+        'scatter', 'bar' or 'line'
+    colormap : List | str | None
+        List with colors (in form of sring with hashes or tuple with floats)
+        or name of colormap defined in matplotlib or bokeh
+    legend_labels : List[str]
+        List with names used as labels in legend
     """
 
     plotsnumber = sum([len(ydata) for ydata in ydatas])
