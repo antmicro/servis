@@ -276,8 +276,8 @@ def render_multiple_time_series_plot(
         from servis.time_series_plotext import render_ascii_plot
 
         render_ascii_plot(
-            ydatas=ydatas[0],
-            xdatas=xdatas[0],
+            ydatas=ydatas,
+            xdatas=xdatas,
             titles=subtitles,
             xtitles=xtitles,
             xunits=xunits,
@@ -285,10 +285,13 @@ def render_multiple_time_series_plot(
             yunits=yunits,
             x_ranges=x_ranges,
             y_ranges=y_ranges,
-            outpath=f'{outpath}.ascii',
+            outpath=f'{outpath}.ascii' if outpath else None,
             figsize=figsize,
+            bins=bins,
             is_x_timestamp=is_x_timestamp,
-            plottype=plottype
+            plottype=plottype,
+            colormap=colormap,
+            legend_labels=legend_labels,
         )
 
     if "png" in outputext and backend == "matplotlib":
@@ -303,7 +306,7 @@ def render_multiple_time_series_plot(
             xunits,
             ytitles,
             yunits,
-            f'{outpath}.png',
+            f'{outpath}.png' if outpath else None,
             figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
@@ -322,7 +325,7 @@ def render_multiple_time_series_plot(
             xunits,
             ytitles,
             yunits,
-            f'{outpath}.svg',
+            f'{outpath}.svg' if outpath else None,
             figsize=(figsize[0] / 100, figsize[1] / 100),
             bins=bins,
             colormap=colormap,
