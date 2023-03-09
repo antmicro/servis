@@ -1,4 +1,4 @@
-from typing import Union, Iterable, Iterator, Optional
+from typing import Union, Iterable, Iterator, Optional, Tuple
 import itertools
 
 DEFAULT_COLOR = '#E74A3C'
@@ -72,6 +72,24 @@ def _to_matplotlib(value: Union[str, Iterable]) -> Iterable:
     return value
 
 
+def _to_plotext(value: Union[str, Iterable]) -> Tuple[int]:
+    """
+    Function converting input to proper plotext color format
+    - tuple of 3 integers
+
+    Parameters
+    ----------
+    value : Union[str, Iterable]
+
+    Returns
+    -------
+    Tuple[int]
+        Color in plotext format
+    """
+    value = _to_matplotlib(value)
+    return tuple([int(255*v) for v in value])
+
+
 def _to_bokeh(value: Union[str, Iterable]) -> str:
     """
     Function converting input to proper bokeh color format
@@ -92,45 +110,11 @@ def _to_bokeh(value: Union[str, Iterable]) -> str:
     return value
 
 
-def get_colormap_for_bokeh(name: str, quantity: int = 3) -> Iterator[str]:
-    """
-    Parameters
-    ----------
-    name : str
-        Name of the colormap
-    quantity: int
-        Number of colors needed
-
-    Returns
-    -------
-    Iterator[str]
-        Iterator with colors from specified colormap in bokeh format
-    """
-    return map(_to_bokeh, get_color_iterator(name, quantity))
-
-
-def get_colormap_for_matplotlib(name: str, quantity: int = 3) -> Iterator:
-    """
-    Parameters
-    ----------
-    name : str
-        Name of the colormap
-    quantity: int
-        Number of colors needed
-
-    Returns
-    -------
-    Iterator[str]
-        Iterator with colors from specified colormap in bokeh format
-    """
-    return map(_to_matplotlib, get_color_iterator(name, quantity))
-
-
 def validate_colormap(
     colormap: Optional[Union[str, Iterable]],
     for_backend: str,
     quantity: int = 3
-):
+) -> Iterator:
     """
     Function for validating and creating colormap for specified backend.
 
@@ -155,20 +139,24 @@ def validate_colormap(
     ColorMapNotFound
         If the colormap was not found
     """
-    assert for_backend in ('bokeh', 'matplotlib'), (
-        "Only avaible options for for_backend are: bokeh, matplotlib")
+    assert for_backend in ('bokeh', 'matplotlib', 'plotext'), (
+        "Only avaible options for for_backend are: bokeh, matplotlib, plotext")
     if for_backend == 'bokeh':
-        get_colormap = get_colormap_for_bokeh
+        to_backend = _to_bokeh
     elif for_backend == 'matplotlib':
-        get_colormap = get_colormap_for_matplotlib
+        to_backend = _to_matplotlib
+    elif for_backend == 'plotext':
+        to_backend = _to_plotext
 
     if colormap is None and quantity == 1:
         colors = iter([DEFAULT_COLOR])
     elif colormap is None and quantity > 1:
-        colors = itertools.chain(
-            [DEFAULT_COLOR], get_colormap("Set1", quantity - 1))
+        color_iter = get_color_iterator("Set1", quantity - 1)
+        # Skip first color as it's similar to DEFAULT_COLOR
+        next(color_iter)
+        colors = map(to_backend, itertools.chain([DEFAULT_COLOR], color_iter))
     elif isinstance(colormap, str):
-        colors = get_colormap_for_matplotlib(colormap, quantity)
+        colors = map(to_backend, get_color_iterator(colormap, quantity))
     else:
         assert len(colormap) >= quantity, (
             "There has to be, at least, the same number of colors "
