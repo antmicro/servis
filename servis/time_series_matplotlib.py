@@ -3,9 +3,14 @@ from pathlib import Path
 from matplotlib import rcParams, pyplot as plt
 import numpy as np
 
-from servis.utils import validate_colormap
+from servis.utils import validate_colormap, validate_kwargs
 
 rcParams['font.sans-serif'] = 'lato'
+NOT_SUPPORTED_PARAMS = {
+    'x_ranges', 'y_ranges', 'outputext', 'trimxvaluesoffsets',
+    'tags', 'tagstype', 'setgradientcolors', 'plottype',
+    'is_x_timestamp'
+}
 
 
 def create_multiple_matplotlib_plot(
@@ -18,10 +23,11 @@ def create_multiple_matplotlib_plot(
         ytitles: Optional[List[str]] = None,
         yunits: Optional[List[str]] = None,
         outpath: Optional[Path] = None,
-        figsize: Tuple = (1500, 1080),
+        figsize: Tuple = (15, 8.5),
         bins: int = 20,
         colormap: Optional[Union[List, str]] = None,
-        legend_labels: List[str] = []):
+        legend_labels: List[str] = [],
+        **kwargs):
     """
     Draws time series plot.
 
@@ -58,6 +64,7 @@ def create_multiple_matplotlib_plot(
     legend_labels : List[str]
         List with names used as labels in legend
     """
+    validate_kwargs(NOT_SUPPORTED_PARAMS, **kwargs)
 
     figsnumber = len(ydatas)
     plotsnumber = sum([len(sub_ydatas) for sub_ydatas in ydatas])
@@ -149,7 +156,8 @@ def create_matplotlib_plot(
         outpath: Optional[Path] = None,
         figsize: Tuple = (15, 8.5),
         bins: int = 20,
-        colormap: Optional[Union[List, str]] = None):
+        colormap: Optional[Union[List, str]] = None,
+        **kwargs):
     """
     Draws time series plot.
 

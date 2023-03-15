@@ -9,11 +9,14 @@ from pathlib import Path
 from bokeh.layouts import gridplot
 import re
 
-from servis.utils import validate_colormap, DEFAULT_COLOR
+from servis.utils import validate_colormap, DEFAULT_COLOR, validate_kwargs
 
 BETWEEN_SECTION_MARGIN_PERCENT = 0.1
 BETWEEN_BAR_MARGIN_PERCENT = 0.
 LEGEND_COLUMNS = 3
+NOT_SUPPORTED_PARAMS = {
+    'is_x_timestamp'
+}
 
 
 def get_colors(data: List):
@@ -489,7 +492,8 @@ def create_bokeh_plot(
         tagstype: str = "single",
         colormap: Optional[Union[List, str]] = None,
         setgradientcolors: bool = False,
-        legend_labels: List[str] = []):
+        legend_labels: List[str] = [],
+        **kwargs):
     """
     Draws and saves time series plot using Bokeh
 
@@ -547,6 +551,7 @@ def create_bokeh_plot(
     legend_labels : List[str]
         List with names used as labels in legend
     """
+    validate_kwargs(NOT_SUPPORTED_PARAMS, **kwargs)
     assert not (setgradientcolors and colormap is not None), (
         "setgradientcolors and colormap cannot be used at the same time")
 
