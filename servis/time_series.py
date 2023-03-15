@@ -272,109 +272,45 @@ def render_multiple_time_series_plot(
     if subtitles is None:
         subtitles = [None for _ in ydatas]
 
-    if "txt" in outputext:
-        from servis.time_series_plotext import render_ascii_plot
+    figsize_copy = figsize
+    for ext in outputext:
+        figsize = figsize_copy
+        if ext == "txt":
+            # Use plotext and set backend specific params
+            from servis.time_series_plotext import render_ascii_plot
+            renderer = render_ascii_plot
+            outpath_form = "{}.ascii"
+            figsize = (figsize[0] // 5, figsize[1] // 5)
+        elif ext == "html" or backend == "bokeh":
+            # Use bokeh and set backend specific params
+            from servis.time_series_bokeh import create_bokeh_plot
+            renderer = create_bokeh_plot
+            outpath_form = "{}"
+        else:
+            # Use matplotlib and set backend specific params
+            from servis.time_series_matplotlib import \
+                create_multiple_matplotlib_plot
+            renderer = create_multiple_matplotlib_plot
+            outpath_form = f"{{}}.{ext}"
+            figsize = (figsize[0] / 100, figsize[1] / 100)
 
-        render_ascii_plot(
+        renderer(
             ydatas=ydatas,
             xdatas=xdatas,
-            titles=subtitles,
+            title=title,
+            subtitles=subtitles,
             xtitles=xtitles,
             xunits=xunits,
             ytitles=ytitles,
             yunits=yunits,
             x_ranges=x_ranges,
             y_ranges=y_ranges,
-            outpath=f'{outpath}.ascii' if outpath else None,
+            outpath=outpath_form.format(outpath) if outpath else None,
+            outputext=[ext],
+            trimxvaluesoffsets=offsets,
             figsize=figsize,
             bins=bins,
             is_x_timestamp=is_x_timestamp,
-            plottype=plottype,
-            colormap=colormap,
-            legend_labels=legend_labels,
-        )
-
-    if "png" in outputext and backend == "matplotlib":
-        from servis.time_series_matplotlib \
-            import create_multiple_matplotlib_plot
-        create_multiple_matplotlib_plot(
-            ydatas,
-            xdatas,
-            title,
-            subtitles,
-            xtitles,
-            xunits,
-            ytitles,
-            yunits,
-            f'{outpath}.png' if outpath else None,
-            figsize=(figsize[0] / 100, figsize[1] / 100),
-            bins=bins,
-            colormap=colormap,
-            legend_labels=legend_labels,
-        )
-
-    if "svg" in outputext and backend == "matplotlib":
-        from servis.time_series_matplotlib \
-            import create_multiple_matplotlib_plot
-        create_multiple_matplotlib_plot(
-            ydatas,
-            xdatas,
-            title,
-            subtitles,
-            xtitles,
-            xunits,
-            ytitles,
-            yunits,
-            f'{outpath}.svg' if outpath else None,
-            figsize=(figsize[0] / 100, figsize[1] / 100),
-            bins=bins,
-            colormap=colormap,
-            legend_labels=legend_labels,
-        )
-
-    if "html" in outputext:
-        from servis.time_series_bokeh import create_bokeh_plot
-        create_bokeh_plot(
-            ydatas,
-            xdatas,
-            title=title,
-            subtitles=subtitles,
-            xtitles=xtitles,
-            xunits=xunits,
-            ytitles=ytitles,
-            yunits=yunits,
-            x_ranges=x_ranges,
-            y_ranges=y_ranges,
-            outpath=outpath,
-            outputext=["html"],
-            trimxvaluesoffsets=offsets,
-            figsize=figsize,
-            bins=bins,
-            plottype=plottype,
-            tags=tags,
-            tagstype=tagstype,
-            colormap=colormap,
-            setgradientcolors=setgradientcolors,
-            legend_labels=legend_labels,
-        )
-    if backend == "bokeh":
-        from servis.time_series_bokeh import create_bokeh_plot
-        create_bokeh_plot(
-            ydatas,
-            xdatas,
-            title=title,
-            subtitles=subtitles,
-            xtitles=xtitles,
-            xunits=xunits,
-            ytitles=ytitles,
-            yunits=yunits,
-            x_ranges=x_ranges,
-            y_ranges=y_ranges,
-            outpath=outpath,
-            outputext=outputext,
-            trimxvaluesoffsets=offsets,
-            figsize=figsize,
-            bins=bins,
             plottype=plottype,
             tags=tags,
             tagstype=tagstype,
