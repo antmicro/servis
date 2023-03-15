@@ -1,4 +1,4 @@
-from typing import Union, Iterable, Iterator, Optional, Tuple
+from typing import Union, Iterable, Iterator, Optional, Tuple, Set
 import itertools
 
 DEFAULT_COLOR = '#E74A3C'
@@ -116,7 +116,7 @@ def validate_colormap(
     quantity: int = 3
 ) -> Iterator:
     """
-    Function for validating and creating colormap for specified backend.
+    Function validating and creating colormap for specified backend.
 
     Parameters
     ----------
@@ -163,3 +163,25 @@ def validate_colormap(
             "as sets of data")
         colors = iter(colormap)
     return colors
+
+
+def validate_kwargs(
+    unsupported_params: Set[str] = set(),
+    **kwargs
+):
+    """
+    Function checking if **kwargs don't contains additional/unsupported
+    parameters
+
+    Parameters
+    ----------
+    unsupported_params : Set[str]
+        Set with parameters unsupported by the function
+    kwargs : Dict
+        Additional parameters passed to the function
+    """
+    additional_params = set(kwargs.keys()).difference(unsupported_params)
+    assert len(additional_params) == 0, (
+        "The following, not known, parameters were passed to function:"
+        f" {', '.join(additional_params)}"
+    )
