@@ -10,9 +10,12 @@ flake8:
     allow_failure: false
 
 test:
-    script:
+    before_script:
         - apt-get update && apt-get install -y fonts-lato
-        - pip3 install -e .[bokeh,matplotlib]
-        - python3 test1.py
-        - python3 test2.py
+        - pip3 install .[bokeh,matplotlib]
+    script:
+        - ./run_tests.sh
+    artifacts:
+        paths:
+            - example_plots/
     allow_failure: false
