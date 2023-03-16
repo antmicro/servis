@@ -397,7 +397,6 @@ def value_histogram(
         plot = bkfigure(plot_width=int(figsize[0]),
                         plot_height=figsize[1],
                         min_border=10,
-                        x_axis_label='Value histogram',
                         x_axis_type='log',
                         toolbar_location="above",
                         tools="save",
@@ -621,18 +620,18 @@ def create_bokeh_plot(
             )
 
             legend_data.append([points, bars])
-            # plot.title.visible = False
             plot.legend.visible = False
+            if xtitle is not None:
+                hist.xaxis.axis_label = "Value histogram"
 
         ts_plots.append(plot)
         val_histograms.append(hist)
 
     if title:
         div = Div(
-            text=f'<p> {title} </p>',
+            text=f'<h1> {title} </h1>',
             style={
                 'font-family': 'Lato',
-                'color': 'white'
             }
         )
         plots = [[div]]
