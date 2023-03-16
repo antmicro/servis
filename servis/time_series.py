@@ -117,7 +117,7 @@ def render_time_series_plot_with_histogram(
         is_x_timestamp,
         plottype,
         [tags] if len(tags) > 0 else [],
-        tagstype,
+        [tagstype],
         backend,
         colormap,
         setgradientcolors,
@@ -144,7 +144,7 @@ def render_multiple_time_series_plot(
         is_x_timestamp: bool = True,
         plottype: str = 'bar',
         tags: List[List[Dict]] = [],
-        tagstype: str = "single",
+        tagstype: Union[str, List[str]] = "single",
         backend: str = "plotext",
         colormap: Optional[List] = None,
         setgradientcolors: bool = False,
@@ -212,10 +212,10 @@ def render_multiple_time_series_plot(
         Type of the plot. Depends on backend
     tags : list
         List of tags and their timestamps for each X-axis
-    tagstype : str
+    tagstype : str | List[str]
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
-        timestamps.
+        timestamps or list with described values.
     backend : str
         "bokeh" for rendering png/svg plot using Bokeh
         "matplotlib" for rendering png/svg plot using Matplotlib
@@ -264,13 +264,22 @@ def render_multiple_time_series_plot(
                 sub_xdatas[i] = [x - minx for x in xdata]
                 offsets.append(minx)
 
-    # Default values for ranges and subtitles
+    figsnumber = len(ydatas)
+    # Default values for None parameters
     if y_ranges is None:
-        y_ranges = [None for _ in range(len(ydatas))]
+        y_ranges = [None for _ in range(figsnumber)]
     if x_ranges is None:
-        x_ranges = [None for _ in range(len(ydatas))]
+        x_ranges = [None for _ in range(figsnumber)]
+    if xtitles is None:
+        xtitles = [None for _ in range(figsnumber)]
+    if ytitles is None:
+        ytitles = [None for _ in range(figsnumber)]
+    if xunits is None:
+        xunits = [None for _ in range(figsnumber)]
+    if yunits is None:
+        yunits = [None for _ in range(figsnumber)]
     if subtitles is None:
-        subtitles = [None for _ in ydatas]
+        subtitles = [None for _ in range(figsnumber)]
 
     figsize_copy = figsize
     for ext in outputext:
@@ -280,7 +289,7 @@ def render_multiple_time_series_plot(
             from servis.time_series_plotext import render_ascii_plot
             renderer = render_ascii_plot
             outpath_form = "{}.ascii"
-            figsize = (figsize[0] // 5, figsize[1] // 5)
+            figsize = (figsize[0] // 10, figsize[1] // 10)
         elif ext == "html" or backend == "bokeh":
             # Use bokeh and set backend specific params
             from servis.time_series_bokeh import create_bokeh_plot
