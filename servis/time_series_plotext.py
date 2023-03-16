@@ -352,7 +352,7 @@ def create_ascii_plot(
     create_ascii_histogram(
         sub_ydatas=sub_ydatas,
         title="Histogram" if title else None,
-        xtitle="Quantity" if xtitle else None,
+        xtitle="Quantity" if xtitle or ytitle else None,
         y_range=y_range,
         figsize=(3*figsize[0] // 11, figsize[1]),
         bins=bins,
