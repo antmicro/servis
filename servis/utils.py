@@ -2,6 +2,11 @@ from typing import Union, Iterable, Iterator, Optional, Tuple, Set
 import itertools
 
 DEFAULT_COLOR = '#E74A3C'
+DEFAULT_ANNOTATION_COLORS = [
+    "#01B47E",
+    "#332D37",
+    "#4088F4",
+    "#F15F32"]
 
 
 class ColorMapNotFound(Exception):
@@ -38,7 +43,7 @@ def get_color_iterator(name: str, quantity: int = 3):
     """
     try:
         from bokeh.palettes import all_palettes
-        return iter(all_palettes[name][quantity if quantity >= 3 else 3])
+        return iter(all_palettes[name][max(quantity, 3)])
     except Exception:
         pass
     try:
@@ -110,6 +115,13 @@ def _to_bokeh(value: Union[str, Iterable]) -> str:
     return value
 
 
+_TO_BACKEND_FUNC = {
+    'bokeh': _to_bokeh,
+    'matplotlib': _to_matplotlib,
+    'plotext': _to_plotext,
+}
+
+
 def validate_colormap(
     colormap: Optional[Union[str, Iterable]],
     for_backend: str,
@@ -141,12 +153,6 @@ def validate_colormap(
     """
     assert for_backend in ('bokeh', 'matplotlib', 'plotext'), (
         "Only avaible options for for_backend are: bokeh, matplotlib, plotext")
-    if for_backend == 'bokeh':
-        to_backend = _to_bokeh
-    elif for_backend == 'matplotlib':
-        to_backend = _to_matplotlib
-    elif for_backend == 'plotext':
-        to_backend = _to_plotext
 
     if colormap is None and quantity == 1:
         colors = iter([DEFAULT_COLOR])
@@ -154,15 +160,15 @@ def validate_colormap(
         color_iter = get_color_iterator("Set1", quantity - 1)
         # Skip first color as it's similar to DEFAULT_COLOR
         next(color_iter)
-        colors = map(to_backend, itertools.chain([DEFAULT_COLOR], color_iter))
+        colors = itertools.chain([DEFAULT_COLOR], color_iter)
     elif isinstance(colormap, str):
-        colors = map(to_backend, get_color_iterator(colormap, quantity))
+        colors = get_color_iterator(colormap, quantity)
     else:
         assert len(colormap) >= quantity, (
             "There has to be, at least, the same number of colors "
             "as sets of data")
-        colors = iter(colormap)
-    return colors
+        colors = colormap
+    return map(_TO_BACKEND_FUNC[for_backend], colors)
 
 
 def validate_kwargs(
