@@ -2,14 +2,21 @@ from typing import List, Dict, Tuple, Optional, Iterator, Union
 from bokeh.plotting import (
     output_file, show, save, figure as bkfigure, Figure, column
 )
-from bokeh.models import Range1d, ColumnDataSource, Span, LabelSet, Div, Legend
+from bokeh.models import (
+    Range1d, ColumnDataSource, Span, LabelSet, Div,
+    Legend, BoxAnnotation, LegendItem, CustomJS
+)
 from numpy import histogram, float_
 from bokeh.io import export_png, export_svg
 from pathlib import Path
 from bokeh.layouts import gridplot
+from collections import defaultdict
 import re
 
-from servis.utils import validate_colormap, DEFAULT_COLOR, validate_kwargs
+from servis.utils import (
+    validate_colormap, DEFAULT_COLOR,
+    DEFAULT_ANNOTATION_COLORS, validate_kwargs
+)
 
 BETWEEN_SECTION_MARGIN_PERCENT = 0.1
 BETWEEN_BAR_MARGIN_PERCENT = 0.
@@ -150,48 +157,49 @@ def add_tags(
                 'name': t['name'],
                 'start': t['start'] + trimxvaluesoffset,
                 'end': t['end'] + trimxvaluesoffset})
-            tags = trimmed_tagstimestamps
+        tags = trimmed_tagstimestamps
+        tags_names = set(tag['name'] for tag in tags)
 
-        tags_names = list()
+        palette = DEFAULT_ANNOTATION_COLORS  # TODO: param for annotaion colors
+        assert len(palette) >= len(tags_names), (
+            f"Number of colors avaiable ({len(palette)}) has to be greater"
+            f" or equal number of tags ({len(tags_names)})")
+        tags_colors = {name: palette[id] for id, name in enumerate(tags_names)}
 
-        for d in tags:
-            if d['name'] not in tags_names:
-                tags_names.append(d['name'])
-
-        palette = ["#01B47E",
-                   "#332D37",
-                   "#4088F4",
-                   "#F15F32"]
-
-        colors = palette[0:len(tags_names)]
-        tags_colors = dict()
-
-        for id, name in enumerate(tags_names):
-            tags_colors[name] = colors[id]
-
-        xdatatags = dict()
-        widths = dict()
-
-        for tn in tags_names:
-            xdatatags[tn] = list()
-            widths[tn] = list()
-
-        for t in tags:
-            xdatatags[t['name']].append((t['start'] + t['end']) / 2)
-            widths[t['name']].append(t['start'] - t['end'])
-
-        for t in tags_names:
-            plot.rect(x=xdatatags[t], y=(min_y_value + max_y_value) / 2,
-                      height=(max_y_value - min_y_value), width=widths[t],
-                      color=tags_colors[t], alpha=0.2,
-                      muted_color=tags_colors[t], muted_alpha=0,
-                      legend_label=t)
-
-        plot.legend.location = "top_left"
-        plot.legend.click_policy = "mute"
-        plot.legend.location = "top_left"
-        plot.legend.title_text_font = "Lato"
-        plot.legend.label_text_font = "Lato"
+        tags_annotations = defaultdict(list)
+        for tag in tags:
+            tags_annotations[tag['name']].append(
+                BoxAnnotation(left=tag['start'], right=tag['end'],
+                              fill_color=tags_colors[tag['name']],
+                              fill_alpha=0.2, line_alpha=0.0)
+            )
+            plot.add_layout(tags_annotations[tag['name']][-1])
+        legend_items = []
+        for name in sorted(tags_names):
+            # Creating dummy object for legend
+            renderer = plot.rect(
+                x=0, y=0,
+                width=0, height=0,
+                color=tags_colors[name],
+                alpha=0.2, muted_alpha=0.0)
+            # Event hidding annotations if dummy object is hidden
+            renderer.js_on_change('muted', CustomJS(
+                args=dict(boxes=tags_annotations[name]),
+                code="""
+                    const m = cb_obj.muted;
+                    for (let box of boxes){
+                        box.visible = !m;
+                }
+                """
+            ))
+            legend_items.append(LegendItem(label=name, renderers=[renderer]))
+        # Add legend to the plot
+        plot.add_layout(Legend(
+            location="top_left",
+            label_text_font="Lato",
+            click_policy='mute',
+            items=legend_items,
+        ))
 
     return plot
 
@@ -311,7 +319,7 @@ def time_series_plot(
         plot = figure
 
     # adding tagging visualizations to the plot
-    if len(tags) > 0:
+    if tags and len(tags) > 0:
         plot = add_tags(plot,
                         tags,
                         tagstype,
@@ -335,12 +343,11 @@ def time_series_plot(
                           left=xdata[:-1],
                           right=xdata[1:],
                           fill_color=data_colors,
-                          line_color=data_colors,
-                          legend_label=title)
+                          line_color=data_colors)
     elif plottype == 'scatter':
         glyph = plot.scatter(x=xdata, y=ydata, size=6,
                              alpha=0.5, line_color=None,
-                             color=data_colors, legend_label=title)
+                             color=data_colors)
 
     return plot, glyph
 
@@ -488,7 +495,7 @@ def create_bokeh_plot(
         bins: int = 20,
         plottype: str = 'scatter',
         tags: List[List[Dict]] = [],
-        tagstype: str = "single",
+        tagstype: Union[str, List[str]] = "single",
         colormap: Optional[Union[List, str]] = None,
         setgradientcolors: bool = False,
         legend_labels: List[str] = [],
@@ -537,10 +544,10 @@ def create_bokeh_plot(
         Can be 'scatter' or 'bar'
     tags : list
         List of tags and their timestamps for each X-axis
-    tagstype : str
+    tagstype : str | List[str]
         "single" if given list contain tags with only one timestamp
         "double" if given list contain tags with two (start and end)
-        timestamps.
+        timestamps or list with desribred values.
     colormap : Optional[Union[List, str]]
         List with colors (in form of sring with hashes or tuple with floats)
         or name of colormap defined in matplotlib or bokeh
@@ -560,27 +567,21 @@ def create_bokeh_plot(
     figsnumber = len(ydatas)
     plotsnumbers = sum([len(sub_ydatas) for sub_ydatas in ydatas])
 
-    if xtitles is None:
-        xtitles = [None for _ in range(figsnumber)]
-    if xunits is None:
-        xunits = [None for _ in range(figsnumber)]
-    if ytitles is None:
-        ytitles = [None for _ in range(figsnumber)]
-    if yunits is None:
-        yunits = [None for _ in range(figsnumber)]
     if len(trimxvaluesoffsets) == 0:
         trimxvaluesoffsets = [0 for i in range(figsnumber)]
     if len(tags) == 0:
         tags = [[] for i in range(figsnumber)]
+    if isinstance(tagstype, str):
+        tagstype = [tagstype] * figsnumber
 
     plot_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
     hist_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
 
     legend_data = []
     for (sub_ydatas, sub_xdatas, subtitle, ytitle, yunit, xtitle, xunit,
-         trimxvaluesoffset, tag, y_range, x_range) in zip(
+         trimxvaluesoffset, tag, tagtype, y_range, x_range) in zip(
         ydatas, xdatas, subtitles, ytitles, yunits, xtitles, xunits,
-            trimxvaluesoffsets, tags, y_ranges, x_ranges):
+            trimxvaluesoffsets, tags, tagstype, y_ranges, x_ranges):
         plot, hist = None, None
         hist_range = (
             min([min(ydata) for ydata in sub_ydatas]),
@@ -601,7 +602,7 @@ def create_bokeh_plot(
                 colors=plot_colors,
                 figsize=(figsize[0] * 8/11, figsize[1] // figsnumber),
                 tags=tag,
-                tagstype=tagstype,
+                tagstype=tagtype,
                 setgradientcolors=setgradientcolors,
                 plottype=plottype,
                 figure=plot
@@ -619,8 +620,8 @@ def create_bokeh_plot(
                 figure=hist
             )
 
+            tag = None
             legend_data.append([points, bars])
-            plot.legend.visible = False
             if xtitle is not None:
                 hist.xaxis.axis_label = "Value histogram"
 
