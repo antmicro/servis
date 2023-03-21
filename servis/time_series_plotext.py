@@ -428,8 +428,6 @@ def render_ascii_plot(
 
     plotsnumber = sum([len(ydata) for ydata in ydatas])
 
-    colors = validate_colormap(colormap, 'plotext', plotsnumber)
-
     if len(legend_labels) == 0:
         legend_labels = [None for _ in range(plotsnumber)]
 
@@ -445,6 +443,11 @@ def render_ascii_plot(
                 x_range, y_range in zip(
                     subtitles, xtitles, xunits, ytitles, yunits,
                     ydatas, xdatas, x_ranges, y_ranges):
+                colors = validate_colormap(
+                    colormap,
+                    'plotext',
+                    quantity=len(ydata)
+                )
                 create_ascii_plot(
                     sub_ydatas=ydata,
                     sub_xdatas=xdata,
