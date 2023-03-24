@@ -1,9 +1,8 @@
 from typing import List, Tuple, Optional, Union
 from pathlib import Path
 from matplotlib import rcParams, pyplot as plt
-import numpy as np
 
-from servis.utils import validate_colormap, validate_kwargs
+from servis.utils import validate_colormap, validate_kwargs, range_over_lists
 
 rcParams['font.sans-serif'] = 'lato'
 RANGE_BORDER_SCALE = 0.04
@@ -91,10 +90,14 @@ def create_multiple_matplotlib_plot(
 
     bbox_extras.append(fig.suptitle(title, fontsize='x-large'))
     if figsnumber == 1:
-        axs = axs[np.newaxis, :]
+        plot_axs = [axs[0]]
+        hist_axs = [axs[1]]
+    else:
+        plot_axs = axs[:, 0]
+        hist_axs = axs[:, 1]
 
     for sub_ydatas, sub_xdatas, y_range, x_range, axplot, axhist in zip(
-            ydatas, xdatas, y_ranges, x_ranges, axs[:, 0], axs[:, 1]):
+            ydatas, xdatas, y_ranges, x_ranges, plot_axs, hist_axs):
         plotsnumber = len(sub_ydatas)
         plot_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
         hist_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
@@ -105,7 +108,7 @@ def create_multiple_matplotlib_plot(
             axplot.scatter(xdata, ydata, color=next(plot_colors),
                            alpha=0.5, label=next(labels))
         # Drawing histogram
-        y_min, y_max = np.min(sub_ydatas), np.max(sub_ydatas)
+        y_min, y_max = range_over_lists(sub_ydatas)
         axhist.hist(
             sub_ydatas, bins=bins,
             orientation='horizontal', range=(y_min, y_max),
@@ -120,7 +123,7 @@ def create_multiple_matplotlib_plot(
         axplot.set_ylim(*y_range)
         axhist.set_ylim(*y_range)
         if x_range is None:
-            x_min, x_max = np.min(sub_xdatas), np.max(sub_xdatas)
+            x_min, x_max = range_over_lists(sub_xdatas)
             border = (x_max - x_min) * RANGE_BORDER_SCALE
             x_range = (x_min - border, x_max + border)
         axplot.set_xlim(*x_range)
@@ -133,7 +136,7 @@ def create_multiple_matplotlib_plot(
             loc="upper center"))
 
     # Adding sub-titles
-    for subtitle, axplot in zip(subtitles, axs[:, 0]):
+    for subtitle, axplot in zip(subtitles, plot_axs):
         axplot.set_title(subtitle)
 
     # Adding x-labels
@@ -141,7 +144,7 @@ def create_multiple_matplotlib_plot(
     if xtitles:
         xlabels = xtitles
         for i, (xunit, xlabel, axplot, axhist) in enumerate(
-                zip(xunits, xlabels, axs[:, 0], axs[:, 1])):
+                zip(xunits, xlabels, plot_axs, hist_axs)):
             if xlabel is None:
                 continue
             if xunit is not None:
@@ -155,7 +158,7 @@ def create_multiple_matplotlib_plot(
     if ytitles:
         ylabels = ytitles
         for i, (yunit, ylabel, axplot) in enumerate(
-                zip(yunits, ylabels, axs[:, 0])):
+                zip(yunits, ylabels, plot_axs)):
             if ylabel is None:
                 continue
             if yunit is not None:

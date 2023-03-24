@@ -6,7 +6,6 @@ from bokeh.models import (
     Range1d, ColumnDataSource, Span, LabelSet, Div,
     Legend, BoxAnnotation, LegendItem, CustomJS
 )
-from numpy import histogram, float_
 from bokeh.io import export_png, export_svg
 from pathlib import Path
 from bokeh.layouts import gridplot
@@ -15,7 +14,8 @@ import re
 
 from servis.utils import (
     validate_colormap, DEFAULT_COLOR,
-    DEFAULT_ANNOTATION_COLORS, validate_kwargs
+    DEFAULT_ANNOTATION_COLORS, validate_kwargs,
+    range_over_lists, histogram
 )
 
 BETWEEN_SECTION_MARGIN_PERCENT = 0.1
@@ -419,7 +419,7 @@ def value_histogram(
     else:
         plot = figure
 
-    hist, edges = histogram(ydata, bins=bins, range=histogram_range)
+    hist, edges = histogram(ydata, bins=bins, bounds=histogram_range)
 
     if setgradientcolors is True:
         data_colors = get_colors(edges[1:])
@@ -582,10 +582,7 @@ def create_bokeh_plot(
         plot_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
         hist_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
         plot, hist = None, None
-        hist_range = (
-            min([min(ydata) for ydata in sub_ydatas]),
-            max([max(ydata) for ydata in sub_ydatas])
-        )
+        hist_range = range_over_lists(sub_ydatas)
         for i, (ydata, xdata) in enumerate(zip(sub_ydatas, sub_xdatas)):
             plot, points = time_series_plot(
                 ydata,
@@ -607,7 +604,7 @@ def create_bokeh_plot(
                 figure=plot
             )
             hist, bars = value_histogram(
-                list(float_(ydata)),
+                ydata,
                 plot.y_range,
                 figsize=(figsize[0] * 3/11, figsize[1] // figsnumber),
                 bins=bins,
