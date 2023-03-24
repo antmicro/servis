@@ -667,6 +667,7 @@ def create_bokeh_plot(
 
         legend_fig.xaxis.visible = False
         legend_fig.yaxis.visible = False
+        legend_fig.outline_line_alpha = 0.0
         legend_fig.renderers += (
             [legend_item[1][0] for legend_item in legend_data] +
             [legend_item[1][1] for legend_item in legend_data])
