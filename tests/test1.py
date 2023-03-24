@@ -1,9 +1,19 @@
-from utils import data1 as data, OUTPATH_PREFIX, get_tags
+import json
 from servis import render_time_series_plot_with_histogram
+
+with open("data1.json", "r") as data:
+    data = json.load(data)
 
 xdata = data["xdata"]
 ydata = data["ydata"]
-tags = get_tags(data, 'double')
+
+tags = []
+for tag in data["tags"]:
+    tags.append({
+        'name':  tag[0],
+        'start': float(tag[1]),
+        'end':   float(tag[2])
+    })
 
 render_time_series_plot_with_histogram(
     ydata,
@@ -13,7 +23,7 @@ render_time_series_plot_with_histogram(
     "unit",
     "Y axis",
     "unit",
-    outpath=f"{OUTPATH_PREFIX}singleplot",
+    outpath="example_plots/singleplot",
     outputext=["txt", "html", "png", "svg"],
     tags=tags,
     tagstype="double",
