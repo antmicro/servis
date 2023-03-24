@@ -1,4 +1,6 @@
-from typing import Union, Iterable, Iterator, Optional, Tuple, Set
+from typing import (
+    Union, Iterable, Iterator, Optional, Tuple, Set, List
+)
 import itertools
 
 DEFAULT_COLOR = '#E74A3C'
@@ -191,3 +193,59 @@ def validate_kwargs(
         "The following, not known, parameters were passed to function:"
         f" {', '.join(additional_params)}"
     )
+
+
+Number = Union[int, float]
+
+
+def max_over_lists(lists: List[List[Number]]) -> Number:
+    """
+    Finds the largest value in list of lists.
+
+    Parameters
+    ----------
+    lists : List[List[Number]]
+        List with lists of numbers
+
+    Returns
+    -------
+    Number
+        The largest value from lists
+    """
+    return max([max(sub_list) for sub_list in lists])
+
+
+def min_over_lists(lists: List[List[Number]]) -> Number:
+    """
+    Finds the smallest value in list of lists.
+
+    Parameters
+    ----------
+    lists : List[List[Number]]
+        List with lists of numbers
+
+    Returns
+    -------
+    Number
+        The smallest value from lists
+    """
+    return min([min(sub_list) for sub_list in lists])
+
+
+def range_over_lists(lists: List[List[Number]]) -> Tuple[Number, Number]:
+    """
+    Finds the range of values from list of lists.
+
+    Parameters
+    ----------
+    lists : List[List[Number]]
+        List with lists of numbers
+
+    Returns
+    -------
+    Number
+        The smallest value from lists
+    Number
+        The largest value from lists
+    """
+    return min_over_lists(lists), max_over_lists(lists)
