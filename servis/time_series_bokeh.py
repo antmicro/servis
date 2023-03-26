@@ -565,7 +565,6 @@ def create_bokeh_plot(
     val_histograms = []
 
     figsnumber = len(ydatas)
-    plotsnumbers = sum([len(sub_ydatas) for sub_ydatas in ydatas])
 
     if len(trimxvaluesoffsets) == 0:
         trimxvaluesoffsets = [0 for i in range(figsnumber)]
@@ -574,14 +573,14 @@ def create_bokeh_plot(
     if isinstance(tagstype, str):
         tagstype = [tagstype] * figsnumber
 
-    plot_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
-    hist_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
-
     legend_data = []
     for (sub_ydatas, sub_xdatas, subtitle, ytitle, yunit, xtitle, xunit,
          trimxvaluesoffset, tag, tagtype, y_range, x_range) in zip(
         ydatas, xdatas, subtitles, ytitles, yunits, xtitles, xunits,
             trimxvaluesoffsets, tags, tagstype, y_ranges, x_ranges):
+        plotsnumbers = len(sub_ydatas)
+        plot_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
+        hist_colors = validate_colormap(colormap, 'bokeh', plotsnumbers)
         plot, hist = None, None
         hist_range = (
             min([min(ydata) for ydata in sub_ydatas]),
