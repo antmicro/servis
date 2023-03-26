@@ -73,10 +73,8 @@ def create_multiple_matplotlib_plot(
     validate_kwargs(NOT_SUPPORTED_PARAMS, **kwargs)
 
     figsnumber = len(ydatas)
-    plotsnumber = sum([len(sub_ydatas) for sub_ydatas in ydatas])
 
-    plot_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
-    hist_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
+    plotsnumber = sum([len(sub_ydatas) for sub_ydatas in ydatas])
     if len(legend_labels) > 0:
         labels = iter(legend_labels)
     else:
@@ -97,6 +95,9 @@ def create_multiple_matplotlib_plot(
 
     for sub_ydatas, sub_xdatas, y_range, x_range, axplot, axhist in zip(
             ydatas, xdatas, y_ranges, x_ranges, axs[:, 0], axs[:, 1]):
+        plotsnumber = len(sub_ydatas)
+        plot_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
+        hist_colors = validate_colormap(colormap, 'matplotlib', plotsnumber)
         axplot.grid()
         axhist.grid(which='both')
         # Drawing points
