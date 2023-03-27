@@ -18,8 +18,6 @@ jobs:
           python-version: 3.10.8
       - name: Install dependencies
         run: pip install -e .[bokeh,matplotlib]
-      - name: Run test1.py
-        run: python test1.py
-      - name: Run test2.py
-        run: python test2.py
+      - name: Run tests
+        run: ./run_tests.sh
 
