@@ -22,7 +22,6 @@ setuptools.setup(
     ],
     extras_require={
         'bokeh': [
-            'numpy==1.23.4',
             'bokeh==2.4.3'
         ],
         'matplotlib': [
