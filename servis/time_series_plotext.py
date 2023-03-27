@@ -5,7 +5,9 @@ from contextlib import redirect_stdout
 from pathlib import Path
 import logging
 
-from servis.utils import validate_colormap, validate_kwargs
+from servis.utils import (
+    validate_colormap, validate_kwargs, histogram
+)
 
 BAR_WIDTH = 0.1
 LOGGER = logging.getLogger(__name__)
@@ -88,35 +90,6 @@ def _set_plot_attributes(
     plotext.canvas_color(canvas_color)
     plotext.axes_color(axes_color)
     plotext.ticks_color(ticks_color)
-
-
-def histogram(data: List, bounds: Tuple, bins: int = 10) -> Tuple[List]:
-    """
-    Calculates histogram of data.
-
-    Parameters
-    ----------
-    data : List
-        Values to calculate histogram
-    bounds : Tuple
-        Lower and upper bound of data
-    bins : int
-        On how many bins data should be divided
-
-    Returns
-    -------
-    List
-        Quantities of values in bins
-    List
-        Bins edges - where they start and end
-    """
-    lower, upper = bounds[0], bounds[1] + 1e-5
-    step = (upper - lower) / bins
-    buckets = [i*step + lower for i in range(bins + 1)]
-    quantities = [0] * bins
-    for value in data:
-        quantities[int((value - lower) / step)] += 1
-    return quantities, buckets
 
 
 def create_ascii_histogram(

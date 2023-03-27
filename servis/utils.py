@@ -3,6 +3,7 @@ from typing import (
 )
 import itertools
 
+EPS = 1e-6
 DEFAULT_COLOR = '#E74A3C'
 DEFAULT_ANNOTATION_COLORS = [
     "#01B47E",
@@ -249,3 +250,38 @@ def range_over_lists(lists: List[List[Number]]) -> Tuple[Number, Number]:
         The largest value from lists
     """
     return min_over_lists(lists), max_over_lists(lists)
+
+
+def histogram(
+    data: List,
+    bounds: Optional[Tuple] = None,
+    bins: int = 10
+) -> Tuple[List]:
+    """
+    Calculates histogram of data.
+
+    Parameters
+    ----------
+    data : List
+        Values to calculate histogram
+    bounds : Tuple | None
+        Lower and upper bound of data
+    bins : int
+        On how many bins data should be divided
+
+    Returns
+    -------
+    List
+        Quantities of values in bins
+    List
+        Bins edges - where they start and end
+    """
+    if bounds is None:
+        bounds = range_over_lists([data])
+    lower, upper = bounds[0], bounds[1] + EPS
+    step = (upper - lower) / bins
+    buckets = [i*step + lower for i in range(bins + 1)]
+    quantities = [0] * bins
+    for value in data:
+        quantities[int((value - lower) / step)] += 1
+    return quantities, buckets
