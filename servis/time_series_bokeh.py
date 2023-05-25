@@ -296,7 +296,6 @@ def time_series_plot(
                         title=title,
                         x_axis_label=xlabel,
                         y_axis_label=ylabel,
-                        x_axis_type="datetime",
                         toolbar_location=None,
                         output_backend='webgl',)
 
