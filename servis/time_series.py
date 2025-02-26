@@ -20,7 +20,7 @@ def render_time_series_plot_with_histogram(
         outputext: Optional[List[str]] = ['txt'],
         trimxvalues: bool = True,
         skipfirst: bool = False,
-        figsize: Tuple = (1500, 850),
+        figsize: Union[Tuple[int, int], str] = (1500, 850),
         bins: int = 20,
         is_x_timestamp: bool = True,
         plottype: str = 'bar',
@@ -69,8 +69,10 @@ def render_time_series_plot_with_histogram(
         the minimal value on this dimension
     skipfirst : bool
         True if the first entry should be removed from plotting.
-    figsize : Tuple
-        The size of the figure
+    figsize : Union[Tuple[int, int], str]
+        In case of a tuple of integers, the size of the figure.
+        If str with "responsive" and backend is `bokeh`, the plot
+        will be responsive.
     bins : int
         Number of bins for value histograms
     is_x_timestamp : bool
@@ -138,7 +140,7 @@ def render_multiple_time_series_plot(
         outputext: Optional[List[str]] = ['txt'],
         trimxvalues: bool = True,
         skipfirst: bool = False,
-        figsize: Tuple = (1500, 1080),
+        figsize: Union[Tuple[int, int], str] = (1500, 1080),
         bins: int = 20,
         is_x_timestamp: bool = True,
         plottype: str = 'bar',
@@ -199,8 +201,10 @@ def render_multiple_time_series_plot(
         the minimal value on this dimension
     skipfirst : bool
         True if the first entry should be removed from plotting.
-    figsize : Tuple
-        The size of the figure
+    figsize : Union[Tuple[int, int], str]
+        In case of a tuple of integers, the size of the figure.
+        If str with "responsive" and backend is `bokeh`, the plot
+        will be responsive.
     bins : int
         Number of bins for value histograms
     is_x_timestamp : bool
@@ -229,6 +233,8 @@ def render_multiple_time_series_plot(
         List with names used as labels in legend
     """
     assert backend in ['bokeh', 'matplotlib', 'plotext']
+    if isinstance(figsize, str):
+        assert figsize == 'responsive' and backend == 'bokeh'
 
     # List -> List[List]
     if not isinstance(xdatas[0], (List, Tuple, Iterable)):

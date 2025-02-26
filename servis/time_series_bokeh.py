@@ -1,16 +1,21 @@
-from typing import List, Dict, Tuple, Optional, Iterator, Union
+from typing import Any, List, Dict, Tuple, Optional, Iterator, Union
+import bokeh
 from bokeh.plotting import (
-    output_file, show, save, figure as bkfigure, Figure, column
+    output_file, show, save, figure as bkfigure, column
 )
 from bokeh.models import (
     Range1d, ColumnDataSource, Span, LabelSet, Div,
-    Legend, BoxAnnotation, LegendItem, CustomJS
+    Legend, BoxAnnotation, LegendItem, CustomJS,
+    GlobalInlineStyleSheet
+
 )
 from bokeh.io import export_png, export_svg
 from pathlib import Path
 from bokeh.layouts import gridplot
 from collections import defaultdict
 import re
+
+import bokeh.plotting
 
 from servis.utils import (
     validate_colormap, DEFAULT_COLOR,
@@ -24,6 +29,9 @@ LEGEND_COLUMNS = 3
 NOT_SUPPORTED_PARAMS = {
     'is_x_timestamp'
 }
+DEFAULT_SIZING_MODE = 'stretch_width'
+PADDINGS = (0, 0, 0, 10)
+PLOT_WIDTH = 90  # in viewport width (vw)
 
 
 def get_colors(data: List):
@@ -75,6 +83,18 @@ def get_colors(data: List):
         # so it has to be divided by 5 to create 20 ranges
         data_colors.append(colors[round(float(d)) // 5])
     return data_colors
+
+
+def convert_size_to_kwargs(
+    figsize: Union[Tuple[int, int], str]
+) -> Dict[str, Any]:
+    kwargs = {}
+    if isinstance(figsize, str):
+        kwargs['sizing_mode'] = DEFAULT_SIZING_MODE
+    else:
+        kwargs["width"] = int(figsize[0])
+        kwargs["height"] = figsize[1]
+    return kwargs
 
 
 def add_tags(
@@ -160,7 +180,8 @@ def add_tags(
         tags = trimmed_tagstimestamps
         tags_names = set(tag['name'] for tag in tags)
 
-        palette = DEFAULT_ANNOTATION_COLORS  # TODO: param for annotaion colors
+        # TODO: param for annotation colors
+        palette = DEFAULT_ANNOTATION_COLORS
         assert len(palette) >= len(tags_names), (
             f"Number of colors avaiable ({len(palette)}) has to be greater"
             f" or equal number of tags ({len(tags_names)})")
@@ -215,13 +236,13 @@ def time_series_plot(
         x_range: Optional[Tuple] = None,
         y_range: Optional[Tuple] = None,
         trimxvaluesoffset: float = 0.0,
-        figsize: Tuple = (1500, 850),
+        figsize: Union[Tuple[int, int], str] = (1500, 850),
         tags: List = [],
         tagstype: str = 'single',
         colors: Optional[Iterator[str]] = None,
         setgradientcolors: bool = False,
         plottype: str = 'scatter',
-        figure: Optional[Figure] = None):
+        figure: Optional[bokeh.plotting.figure] = None):
     """
     Returns time series plot.
 
@@ -249,8 +270,9 @@ def time_series_plot(
         The range of zoom on Y axis
     trimxvaluesoffset: float
         The number by which the values will be trimmed
-    figsize : Tuple
-        The size of the figure
+    figsize : Union[Tuple[int, int], str]
+        The size of the figure if Tuple.
+        If None, the figure will be responsive.
     tags : list
         List of tags and their timestamps
     tagstype : str
@@ -264,7 +286,7 @@ def time_series_plot(
         False otherwise.
     plottype : str
         Can be 'scatter' or 'bar'
-    figure : Optional[bokeh.plotting.Figure]
+    figure : Optional[bokeh.plotting.figure]
         Figure to make plot
 
     Returns
@@ -290,14 +312,19 @@ def time_series_plot(
             if yunit is not None:
                 ylabel += f' [{yunit}]'
 
-        plot = bkfigure(width=int(figsize[0]),
-                        height=figsize[1],
-                        min_border=10,
-                        title=title,
-                        x_axis_label=xlabel,
-                        y_axis_label=ylabel,
-                        toolbar_location=None,
-                        output_backend='webgl',)
+        plot = bkfigure(
+            **convert_size_to_kwargs(figsize),
+            min_border=10,
+            title=title,
+            x_axis_label=xlabel,
+            y_axis_label=ylabel,
+            toolbar_location=None,
+            output_backend='webgl',
+            css_classes=['time-series-plot'],
+            styles={
+                "width": f"calc({PLOT_WIDTH}vw * 4 / 5 - 2vw)",
+            },
+        )
 
         if title:
             plot.title.text_font_size = '18pt'
@@ -354,14 +381,14 @@ def time_series_plot(
 def value_histogram(
         ydata: List,
         yrange: Optional[Range1d] = None,
-        figsize: Tuple = (1500, 850),
+        figsize: Union[Tuple[int, int], str] = (1500, 850),
         bins: int = 20,
         colors: Optional[Iterator[str]] = None,
         setgradientcolors: bool = False,
         histogram_range: Tuple = None,
         data_id: Optional[int] = None,
         data_len: Optional[int] = None,
-        figure: Optional[Figure] = None):
+        figure: Optional[bokeh.plotting.figure] = None):
     """
     Returns the histogram of values that appeared throughout the
     experiment.
@@ -372,8 +399,9 @@ def value_histogram(
         The values for Y dimension
     yrange : Optional[Tuple]
         The range of zoom on Y axis
-    figsize : Tuple
-        The size of the figure
+    figsize : Union[Tuple[int, int], str]
+        The size of the figure if Tuple.
+        "responsive" to make the plot responsive.
     bins : int
         Number of bins for value histograms
     colors : Optional[Iterator[str]]
@@ -387,7 +415,7 @@ def value_histogram(
         Number of set
     data_len : Optional[int]
         Quantity of sets
-    figure : Optional[bokeh.plotting.Figure]
+    figure : Optional[bokeh.plotting.figure]
         Figure to make plot
 
     Returns
@@ -398,16 +426,21 @@ def value_histogram(
         Glyph containing reference to histogram plot, which can be
         connected with legend entry
     """
-
     if figure is None:
-        plot = bkfigure(plot_width=int(figsize[0]),
-                        plot_height=figsize[1],
-                        min_border=10,
-                        x_axis_type='log',
-                        toolbar_location="above",
-                        tools="save",
-                        y_range=yrange,
-                        output_backend='webgl',)
+        plot = bkfigure(
+            **convert_size_to_kwargs(figsize),
+            min_border=10,
+            x_axis_type='log',
+            toolbar_location='above',
+            tools='save',
+            y_range=yrange,
+            output_backend='webgl',
+            css_classes=['histogram'],
+            styles={
+                "width": f"calc({PLOT_WIDTH}vw * 1 / 5 - 2vw)",
+                "margin-left": "-3vw",
+            },
+        )
 
         plot.yaxis.major_tick_line_color = None
         plot.yaxis.minor_tick_line_color = None
@@ -490,7 +523,7 @@ def create_bokeh_plot(
         outpath: Optional[Path] = None,
         outputext: Optional[List[str]] = ['html'],
         trimxvaluesoffsets: Optional[List[float]] = [],
-        figsize: Tuple = (1500, 1080),
+        figsize: Union[Tuple[int, int], str] = 'responsive',
         bins: int = 20,
         plottype: str = 'scatter',
         tags: List[List[Dict]] = [],
@@ -535,8 +568,9 @@ def create_bokeh_plot(
     trimxvaluesoffsets : List[float]
         The  list of offsets - numbers by which the tags timestamps values
         will be trimmed
-    figsize : Tuple
-        The size of the figure
+    figsize : Union[Tuple[int, int], str]
+        The size of the figure if Tuple.
+        Str with "responsive" to make the plot responsive.
     bins : int
         Number of bins for value histograms
     plottype : str
@@ -595,7 +629,8 @@ def create_bokeh_plot(
                 y_range,
                 trimxvaluesoffset,
                 colors=plot_colors,
-                figsize=(figsize[0] * 8/11, figsize[1] // figsnumber),
+                figsize=(figsize[0] * 8/11, figsize[1] // figsnumber)
+                if isinstance(figsize, Tuple) else "responsive",
                 tags=tag,
                 tagstype=tagtype,
                 setgradientcolors=setgradientcolors,
@@ -605,7 +640,8 @@ def create_bokeh_plot(
             hist, bars = value_histogram(
                 ydata,
                 plot.y_range,
-                figsize=(figsize[0] * 3/11, figsize[1] // figsnumber),
+                figsize=(figsize[0] * 3/11, figsize[1] // figsnumber)
+                if isinstance(figsize, Tuple) else "responsive",
                 bins=bins,
                 colors=hist_colors,
                 setgradientcolors=setgradientcolors,
@@ -623,12 +659,20 @@ def create_bokeh_plot(
         ts_plots.append(plot)
         val_histograms.append(hist)
 
+    stylesheet = GlobalInlineStyleSheet(
+        css=f"""
+        .bk-GridPlot {{
+            max-width: {PLOT_WIDTH}vw;
+        }}
+        """
+    )
     if title:
         div = Div(
             text=f'<h1> {title} </h1>',
-            style={
+            styles={
                 'font-family': 'Lato',
-            }
+            },
+            stylesheets=[stylesheet],
         )
         plots = [[div]]
     else:
@@ -640,35 +684,59 @@ def create_bokeh_plot(
     multiple_plot = gridplot(
         plots, merge_tools=True, toolbar_location='above',
         toolbar_options={'logo': None},
+        sizing_mode=DEFAULT_SIZING_MODE,
     )
+    multiple_plot.margin = PADDINGS
 
-    if len(legend_labels) > 0:
+    if len(legend_labels) > 1:
         legend_data = [(label, data)
                        for label, data in zip(legend_labels, legend_data)]
+
+        fake_plot_height = 115
+        legend_item_height = 20
         # Creating fake figure for legend
         legend_fig = bkfigure(
             min_border_left=plots[-1][0].width // 5,
-            frame_width=0,
-            frame_height=11*len(legend_data),
-            toolbar_location=None)
+            frame_width=170,
+            frame_height=(
+                fake_plot_height + legend_item_height * len(legend_data)
+            ),
+            toolbar_location=None,
+        )
         # Creating few columns with legends
         legends = []
         for offset in range(LEGEND_COLUMNS):
             legends.append(
-                Legend(items=legend_data[offset::LEGEND_COLUMNS],
-                       orientation='vertical',
-                       location='center',
-                       click_policy='hide')
+                Legend(
+                    items=legend_data[offset::LEGEND_COLUMNS],
+                    orientation='vertical',
+                    location='center',
+                    click_policy='hide'
+                )
             )
 
+        legend_fig.visible = True
+        legend_fig.background_fill_color = None
         legend_fig.xaxis.visible = False
         legend_fig.yaxis.visible = False
+        legend_fig.grid[0].visible = False
+        legend_fig.ygrid[0].visible = False
         legend_fig.outline_line_alpha = 0.0
+
         legend_fig.renderers += (
             [legend_item[1][0] for legend_item in legend_data] +
-            [legend_item[1][1] for legend_item in legend_data])
-        [legend_fig.add_layout(legend, place='right') for legend in legends]
-        multiple_plot = column(multiple_plot, legend_fig)
+            [legend_item[1][1] for legend_item in legend_data]
+        )
+
+        # Zoom into a region without data points to "hide" a fake plot.
+        legend_fig.x_range = Range1d(0, 0)
+        legend_fig.y_range = Range1d(-99_998, -99_999)
+
+        [legend_fig.add_layout(legend, place='below') for legend in legends]
+        multiple_plot = column(
+            [multiple_plot, legend_fig],
+            sizing_mode=DEFAULT_SIZING_MODE,
+        )
 
     if outpath is None:
         show(multiple_plot)
@@ -677,14 +745,7 @@ def create_bokeh_plot(
         output_file_name = f"{outpath}.html"
         output_file(output_file_name, title=title, mode='inline')
         save(multiple_plot)
-
         add_font_url_to_html(output_file_name)
-
-    multiple_plot = gridplot(
-        plots, merge_tools=True,
-        toolbar_location=None)
-    if len(legend_labels) > 1:
-        multiple_plot = column(multiple_plot, legend_fig)
 
     if "png" in outputext:
         export_png(multiple_plot, filename=f"{outpath}.png")
