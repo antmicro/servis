@@ -14,7 +14,7 @@ classifiers = [
 
 
 [project.optional-dependencies]
-bokeh = ["bokeh==3.6.3"]
+bokeh = ["bokeh==3.7.2"]
 matplotlib = ["matplotlib==3.10.1"]
 
 
