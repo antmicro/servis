@@ -1,0 +1,32 @@
+[project]
+name = "servis"
+description = "Servis - a tool for drawing time series plots"
+authors = [{ name = "Antmicro Ltd.", email = "contact@antmicro.com" }]
+version = "0.0.1"
+readme = "README.md"
+dependencies = ["plotext==5.0.2"]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+
+[project.optional-dependencies]
+bokeh = ["bokeh==3.6.3"]
+matplotlib = ["matplotlib==3.6.1"]
+
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 77.0.3"]
+
+[tool.setuptools]
+packages = ["servis"]
+
+[project.urls]
+Repository = "https://github.com/antmicro/servis"
+
+[project.scripts]
+servis = "servis.__main__:main"
