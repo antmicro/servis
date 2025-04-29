@@ -31,7 +31,7 @@ NOT_SUPPORTED_PARAMS = {
 }
 DEFAULT_SIZING_MODE = 'stretch_width'
 PADDINGS = (0, 0, 0, 10)
-PLOT_WIDTH = 90  # in viewport width (vw)
+PLOT_WIDTH = 80  # in viewport width (vw)
 
 
 def get_colors(data: List):
@@ -438,7 +438,7 @@ def value_histogram(
             css_classes=['histogram'],
             styles={
                 "width": f"calc({PLOT_WIDTH}vw * 1 / 5 - 2vw)",
-                "margin-left": "-3vw",
+                "max-width": "100%",
             },
         )
 
@@ -531,6 +531,7 @@ def create_bokeh_plot(
         colormap: Optional[Union[List, str]] = None,
         setgradientcolors: bool = False,
         legend_labels: List[str] = [],
+        plot_width: Optional[int] = 90,
         **kwargs):
     """
     Draws and saves time series plot using Bokeh
@@ -686,6 +687,7 @@ def create_bokeh_plot(
         toolbar_options={'logo': None},
         sizing_mode=DEFAULT_SIZING_MODE,
     )
+    multiple_plot.cols = ["1fr", "1fr"]
     multiple_plot.margin = PADDINGS
 
     if len(legend_labels) > 1:
