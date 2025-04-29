@@ -531,7 +531,6 @@ def create_bokeh_plot(
         colormap: Optional[Union[List, str]] = None,
         setgradientcolors: bool = False,
         legend_labels: List[str] = [],
-        plot_width: Optional[int] = 90,
         **kwargs):
     """
     Draws and saves time series plot using Bokeh
@@ -698,8 +697,8 @@ def create_bokeh_plot(
         legend_item_height = 20
         # Creating fake figure for legend
         legend_fig = bkfigure(
-            min_border_left=plots[-1][0].width // 5,
-            frame_width=170,
+            min_border_left=plots[-1][0].width // 9,
+            frame_width=500,
             frame_height=(
                 fake_plot_height + legend_item_height * len(legend_data)
             ),
@@ -712,7 +711,7 @@ def create_bokeh_plot(
                 Legend(
                     items=legend_data[offset::LEGEND_COLUMNS],
                     orientation='vertical',
-                    location='center',
+                    location='left',
                     click_policy='hide'
                 )
             )
@@ -724,6 +723,9 @@ def create_bokeh_plot(
         legend_fig.grid[0].visible = False
         legend_fig.ygrid[0].visible = False
         legend_fig.outline_line_alpha = 0.0
+        legend_fig.styles = {
+            "margin-bottom": "2rem",
+        }
 
         legend_fig.renderers += (
             [legend_item[1][0] for legend_item in legend_data] +
@@ -732,7 +734,6 @@ def create_bokeh_plot(
 
         # Zoom into a region without data points to "hide" a fake plot.
         legend_fig.x_range = Range1d(0, 0)
-        legend_fig.y_range = Range1d(-99_998, -99_999)
 
         [legend_fig.add_layout(legend, place='below') for legend in legends]
         multiple_plot = column(
