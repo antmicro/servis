@@ -1,7 +1,7 @@
 from typing import Any, List, Dict, Tuple, Optional, Iterator, Union
 import bokeh
 from bokeh.plotting import (
-    output_file, show, save, figure as bkfigure, column
+    output_file, show, save, figure as bkfigure
 )
 from bokeh.models import (
     Range1d, ColumnDataSource, Span, LabelSet, Div,
@@ -11,7 +11,7 @@ from bokeh.models import (
 )
 from bokeh.io import export_png, export_svg
 from pathlib import Path
-from bokeh.layouts import gridplot
+from bokeh.layouts import gridplot, layout
 from collections import defaultdict
 import re
 
@@ -300,6 +300,8 @@ def time_series_plot(
     assert plottype in ['scatter', 'bar']
 
     if figure is None:
+        safety_offset = 20
+
         xlabel = None
         if xtitle:
             xlabel = xtitle
@@ -322,7 +324,7 @@ def time_series_plot(
             output_backend='webgl',
             css_classes=['time-series-plot'],
             styles={
-                "width": f"calc({PLOT_WIDTH}vw * 4 / 5 - 2vw)",
+                "width": f"calc({PLOT_WIDTH - safety_offset}vw * 4 / 5 - 2vw)",
             },
         )
 
@@ -427,6 +429,8 @@ def value_histogram(
         connected with legend entry
     """
     if figure is None:
+        safety_offset = 20
+
         plot = bkfigure(
             **convert_size_to_kwargs(figsize),
             min_border=10,
@@ -437,7 +441,7 @@ def value_histogram(
             output_backend='webgl',
             css_classes=['histogram'],
             styles={
-                "width": f"calc({PLOT_WIDTH}vw * 1 / 5 - 2vw)",
+                "width": f"calc({PLOT_WIDTH - safety_offset}vw * 1 / 5 - 2vw)",
                 "max-width": "100%",
             },
         )
@@ -682,7 +686,9 @@ def create_bokeh_plot(
         plots.append([ts_plot, val_hist])
 
     multiple_plot = gridplot(
-        plots, merge_tools=True, toolbar_location='above',
+        plots,
+        merge_tools=True,
+        toolbar_location='above',
         toolbar_options={'logo': None},
         sizing_mode=DEFAULT_SIZING_MODE,
     )
@@ -690,31 +696,46 @@ def create_bokeh_plot(
     multiple_plot.margin = PADDINGS
 
     if len(legend_labels) > 1:
-        legend_data = [(label, data)
-                       for label, data in zip(legend_labels, legend_data)]
+        legend_items = [
+            LegendItem(label=label, renderers=data)
+            for label, data in zip(legend_labels, legend_data)
+        ]
 
-        fake_plot_height = 115
-        legend_item_height = 20
+        # Line width + margin + padding + label width
+        legend_length = [
+            20 + 20 + 10 + 6 * len(x.label.value) for x in legend_items
+        ]
+
+        # Iterate over length of labels to find the number of columns
+        # that would fit under the plot
+        legend_columns = len(legend_length)
+        for i in range(len(legend_length) - 1):
+            for j in range(i + 1, len(legend_length)):
+                if sum(legend_length[i:j]) > figsize[0]:
+                    if legend_columns > j - i - 1:
+                        legend_columns = j - i - 1
+                    break
+        legend_columns = max(1, legend_columns)
+
         # Creating fake figure for legend
         legend_fig = bkfigure(
             min_border_left=plots[-1][0].width // 9,
-            frame_width=500,
-            frame_height=(
-                fake_plot_height + legend_item_height * len(legend_data)
-            ),
+            frame_height=100 * len(legend_items) // legend_columns,
             toolbar_location=None,
+            max_width=figsize[0],
+            max_height=figsize[1],
+            match_aspect=True,
+            sizing_mode=DEFAULT_SIZING_MODE,
+            height_policy="max",
+            width_policy="auto",
         )
-        # Creating few columns with legends
-        legends = []
-        for offset in range(LEGEND_COLUMNS):
-            legends.append(
-                Legend(
-                    items=legend_data[offset::LEGEND_COLUMNS],
-                    orientation='vertical',
-                    location='left',
-                    click_policy='hide'
-                )
-            )
+        legend = Legend(
+            items=legend_items,
+            orientation="vertical",
+            location="left",
+            click_policy="hide",
+            ncols=legend_columns,
+        )
 
         legend_fig.visible = True
         legend_fig.background_fill_color = None
@@ -727,17 +748,16 @@ def create_bokeh_plot(
             "margin-bottom": "2rem",
         }
 
-        legend_fig.renderers += (
-            [legend_item[1][0] for legend_item in legend_data] +
-            [legend_item[1][1] for legend_item in legend_data]
-        )
+        for item in legend_items:
+            legend_fig.renderers.extend(item.renderers)
 
         # Zoom into a region without data points to "hide" a fake plot.
         legend_fig.x_range = Range1d(0, 0)
 
-        [legend_fig.add_layout(legend, place='below') for legend in legends]
-        multiple_plot = column(
-            [multiple_plot, legend_fig],
+        legend_fig.add_layout(legend, place="center")
+
+        multiple_plot = layout(
+            [[multiple_plot], [legend_fig]],
             sizing_mode=DEFAULT_SIZING_MODE,
         )
 
