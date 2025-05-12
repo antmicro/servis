@@ -257,6 +257,9 @@ def render_multiple_time_series_plot(
     start = 1 if skipfirst else 0
     for sub_xdatas, sub_ydatas in zip(xdatas, ydatas):
         for i, (xdata, ydata) in enumerate(zip(sub_xdatas, sub_ydatas)):
+            # Prevent skipping resulting with empty array
+            if len(xdata) == 1:
+                continue
             sub_xdatas[i] = xdata[start:]
             sub_ydatas[i] = ydata[start:]
 
