@@ -29,7 +29,7 @@ LEGEND_COLUMNS = 3
 NOT_SUPPORTED_PARAMS = {
     'is_x_timestamp'
 }
-DEFAULT_SIZING_MODE = 'stretch_width'
+DEFAULT_SIZING_MODE = 'scale_height'
 PADDINGS = (0, 0, 0, 10)
 PLOT_WIDTH = 80  # in viewport width (vw)
 
@@ -89,9 +89,7 @@ def convert_size_to_kwargs(
     figsize: Union[Tuple[int, int], str]
 ) -> Dict[str, Any]:
     kwargs = {}
-    if isinstance(figsize, str):
-        kwargs['sizing_mode'] = DEFAULT_SIZING_MODE
-    else:
+    if isinstance(figsize, Tuple):
         kwargs["width"] = int(figsize[0])
         kwargs["height"] = figsize[1]
     return kwargs
@@ -300,8 +298,6 @@ def time_series_plot(
     assert plottype in ['scatter', 'bar']
 
     if figure is None:
-        safety_offset = 20
-
         xlabel = None
         if xtitle:
             xlabel = xtitle
@@ -323,9 +319,7 @@ def time_series_plot(
             toolbar_location=None,
             output_backend='webgl',
             css_classes=['time-series-plot'],
-            styles={
-                "width": f"calc({PLOT_WIDTH - safety_offset}vw * 4 / 5 - 2vw)",
-            },
+            sizing_mode=DEFAULT_SIZING_MODE,
         )
 
         if title:
@@ -429,8 +423,6 @@ def value_histogram(
         connected with legend entry
     """
     if figure is None:
-        safety_offset = 20
-
         plot = bkfigure(
             **convert_size_to_kwargs(figsize),
             min_border=10,
@@ -440,10 +432,7 @@ def value_histogram(
             y_range=yrange,
             output_backend='webgl',
             css_classes=['histogram'],
-            styles={
-                "width": f"calc({PLOT_WIDTH - safety_offset}vw * 1 / 5 - 2vw)",
-                "max-width": "100%",
-            },
+            sizing_mode=DEFAULT_SIZING_MODE,
         )
 
         plot.yaxis.major_tick_line_color = None
@@ -692,7 +681,7 @@ def create_bokeh_plot(
         toolbar_options={'logo': None},
         sizing_mode=DEFAULT_SIZING_MODE,
     )
-    multiple_plot.cols = ["1fr", "1fr"]
+    multiple_plot.cols = ["75%", "25%"]
     multiple_plot.margin = PADDINGS
 
     if len(legend_labels) > 1:
