@@ -29,8 +29,8 @@ LEGEND_COLUMNS = 3
 NOT_SUPPORTED_PARAMS = {
     'is_x_timestamp'
 }
-DEFAULT_SIZING_MODE = 'scale_height'
-PADDINGS = (0, 0, 0, 10)
+DEFAULT_SIZING_MODE = 'scale_width'
+PADDINGS = (0, 0, 0, 0)
 PLOT_WIDTH = 80  # in viewport width (vw)
 
 
@@ -319,7 +319,8 @@ def time_series_plot(
             toolbar_location=None,
             output_backend='webgl',
             css_classes=['time-series-plot'],
-            sizing_mode=DEFAULT_SIZING_MODE,
+            width_policy="max",
+            height_policy="auto",
         )
 
         if title:
@@ -432,7 +433,8 @@ def value_histogram(
             y_range=yrange,
             output_backend='webgl',
             css_classes=['histogram'],
-            sizing_mode=DEFAULT_SIZING_MODE,
+            width_policy="max",
+            height_policy="auto",
         )
 
         plot.yaxis.major_tick_line_color = None
@@ -714,9 +716,8 @@ def create_bokeh_plot(
             max_width=figsize[0],
             max_height=figsize[1],
             match_aspect=True,
-            sizing_mode=DEFAULT_SIZING_MODE,
-            height_policy="max",
-            width_policy="auto",
+            height_policy="auto",
+            width_policy="max",
         )
         legend = Legend(
             items=legend_items,
