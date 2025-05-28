@@ -716,8 +716,14 @@ def create_bokeh_plot(
             max_width=figsize[0],
             max_height=figsize[1],
             match_aspect=True,
-            height_policy="auto",
+            height_policy="min",
             width_policy="max",
+            styles={
+                "width": "100%",
+                "max-height": "40vh",
+                "overflow": "clip",
+            },
+
         )
         legend = Legend(
             items=legend_items,
@@ -734,9 +740,6 @@ def create_bokeh_plot(
         legend_fig.grid[0].visible = False
         legend_fig.ygrid[0].visible = False
         legend_fig.outline_line_alpha = 0.0
-        legend_fig.styles = {
-            "margin-bottom": "2rem",
-        }
 
         for item in legend_items:
             legend_fig.renderers.extend(item.renderers)
